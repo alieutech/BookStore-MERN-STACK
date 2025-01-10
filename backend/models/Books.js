@@ -17,6 +17,10 @@ const books = new mongoose.Schema({
     price: {
         type: Number,
         require: true
+    },
+    image: {
+        type: String,
+        require: true
     }
 })
 

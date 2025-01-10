@@ -1,19 +1,20 @@
 const Books = require('../models/Books');
 
-
+// Fetch all Books
 const getBooks = async (req, res) => {
-    const books = await Books.find({});
+    const books = await Books.find();
     if(!books) {
-        return res.status(401).json({'message': 'No books are found'})
+        return res.status(401).json({'message': 'No books are found' })
     }
-    res.status(200).json({'success': 'All books are found'})
+    res.status(200).json({'success': 'All books are found', data: books})
    
 
 };
 
+// Create new Book
 const createNewBook = async (req, res) => {
-    const { title, author, publishYear } = req.body;
-    if(!title || !author || !publishYear) {
+    const { title, author, publishYear, price, image } = req.body;
+    if(!title || !author || !publishYear || !price || !image) {
         return res.status(401).json({'message': "title, author and year publish are required."})
     }
     try {
@@ -21,7 +22,8 @@ const createNewBook = async (req, res) => {
             title: req.body.title,
             author: req.body.author,
             publishYear: req.body.publishYear,
-            price: req.body.price
+            price: req.body.price,
+            image: req.body.price
         })
         res.status(201).json(book);
     } catch (err){
@@ -29,23 +31,40 @@ const createNewBook = async (req, res) => {
     }
 }
 
+// UPdate Book by ID
 const updateBooks = async (req, res) => {
-    if(!req?.body?.id) {
-        return res.status(400).json({'message': 'Books ID is required'})
+    try {
+      const { id, title, author, publishYear, price, image } = req.body;
+  
+      if (!req.body.id) {
+        return res.status(400).json({ message: 'Book ID is required.' });
+      }
+  
+      const book = await Books.findById({ _id: req.body.id })
+      if (!book) {
+        return res.status(404).json({ message: `No book matches ID ${req.body.id}.` });
+      }
+      
+      if (id) book.id = id;
+      if (title) book.title = title;
+      if (author) book.author = author;
+      if (publishYear) book.publishYear = publishYear;
+      if (price) book.price = price;
+      if (image) book.image = image;
+  
+      const result = await book.save();
+  
+      res.status(200).json({success: true, message: "Book updated successfully.", data: result,});
+    } catch (error) {
+      console.error("Error updating book:", error);
+      if (error.name === "CastError") {
+        return res.status(400).json({ message: "Invalid book ID format." });
+      }
+      res.status(500).json({ message: "An error occurred while updating the book." });
     }
-    const book = await Books.findOne({ _id: req.body.id }).exec()
-    if(!book) {
-     return res.status(204).json({"message": `No book matches ID ${req.body.id} `})
-   }
-   if(req.body?.title) book.title = req.body.title;
-   if(req.body?.author) book.author = req.body.author;
-   if(req.body?.publishYear) book.publishYear = req.body.publishYear;
-   if(req.body?.price) book.price = req.body.price;
-   
-   const result = await book.save()
-   res.json(result);
-};
-
+  };
+  
+// Get Book by ID
 const getBook = async (req, res) => {
     if(!req?.params?.id) {
         return res.status(400).json({'message': 'Books ID is required'})
@@ -58,19 +77,31 @@ const getBook = async (req, res) => {
 
 }
 
-
+// Delete Book by ID
 const deleteBook = async (req, res) => {
-    if(!req?.body?.id) {
-        return res.status(400).json({'message': 'Book ID is required'})
-    }
-    const book = await Books.findOne({ _id: req.body.id }).exec()
-    if(!book) {
-    return res.status(204).json({"message": `No book matches ID ${req.body.id}`})
-   }
-   const result = await book.deleteOne({ _id: req.body.id })
-    res.json(result);
+    try {
+        const { id } = req.params; 
+        if (!id) {
+            return res.status(400).json({ message: 'Book ID is required' });
+        }
+        const book = await Books.findById({_id: req.params.id});
+        if (!book) {
+            return res.status(404).json({ message: `No book matches ID ${req.params.id}` });
+        }
 
+        const result = await book.deleteOne(); 
+        return res.status(200).json({
+            success: true,
+            message: `Book with ID ${req.params.id} deleted successfully`,
+            data: result,
+        });
+    } catch (err) {
+        console.error('Error deleting book:', err);
+        return res.status(500).json({ success: false, message: 'Server error while deleting book' });
+    }
 };
+
+
 
 
 
