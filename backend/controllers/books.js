@@ -33,9 +33,7 @@ const createNewBook = async (req, res) => {
 
 // UPdate Book by ID
 const updateBooks = async (req, res) => {
-    try {
-      const { id, title, author, publishYear, price, image } = req.body;
-  
+    try {  
       if (!req.body.id) {
         return res.status(400).json({ message: 'Book ID is required.' });
       }
@@ -45,22 +43,11 @@ const updateBooks = async (req, res) => {
         return res.status(404).json({ message: `No book matches ID ${req.body.id}.` });
       }
       
-      if (id) book.id = id;
-      if (title) book.title = title;
-      if (author) book.author = author;
-      if (publishYear) book.publishYear = publishYear;
-      if (price) book.price = price;
-      if (image) book.image = image;
-  
       const result = await book.save();
   
       res.status(200).json({success: true, message: "Book updated successfully.", data: result,});
-    } catch (error) {
-      console.error("Error updating book:", error);
-      if (error.name === "CastError") {
-        return res.status(400).json({ message: "Invalid book ID format." });
-      }
-      res.status(500).json({ message: "An error occurred while updating the book." });
+    } catch (err) {
+      console.error("Error updating book:", err);
     }
   };
   

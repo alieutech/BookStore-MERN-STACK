@@ -34,8 +34,8 @@ const BookCard = ({ book }) => {
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const handleDeleteBook = async (pid) => {
-		const { success, message } = await deleteBook(pid);
+	const handleDeleteBook = async (id) => {
+		const { success, message } = await deleteBook(id);
 		if (!success) {
 			toast({
 				title: "Error",
@@ -55,8 +55,8 @@ const BookCard = ({ book }) => {
 		}
 	};
 
-	const handleUpdateBook = async (pid, updatedBook) => {
-		const { success, message } = await updateBook(pid, updatedBook);
+	const handleUpdateBook = async (id, updatedBook) => {
+		const { success, message } = await updateBook(id, updatedBook);
 		onClose();
 		if (!success) {
 			toast({

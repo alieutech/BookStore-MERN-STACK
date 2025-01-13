@@ -73,6 +73,8 @@ const CreatePage = () => {
 						<Input
 							placeholder='Image URL'
 							name='image'
+							type="image/*"
+							// accept="image/*"
 							value={newBook.image}
 							onChange={(e) => setNewBook({ ...newBook, image: e.target.value })}
 						/>

@@ -55,8 +55,8 @@ export const useBookStore = create((set) => ({
   },
 
   // Delete a book
-  deleteBook: async (pid) => {
-      const res = await fetch(`${API_BASE_URL}/books/${pid}`, {
+  deleteBook: async (id) => {
+      const res = await fetch(`${API_BASE_URL}/books/${id}`, {
         method: "DELETE",
       });
 
@@ -68,16 +68,16 @@ export const useBookStore = create((set) => ({
       if (!data.success) return { success: false, message: data.message };
 
       // Update the books state
-      set((state) => ({ books: state.books.filter((book) => book._id !== pid) }));
-      console.log("Book deleted successfully:", pid);
+      set((state) => ({ books: state.books.filter((book) => book._id !== id) }));
+      console.log("Book deleted successfully:", id);
       return { success: true, message: "Book deleted successfully." };
     
   },
 
   // Update a book
-  updateBook: async (pid, updatedBook) => {
+  updateBook: async (id, updatedBook) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/books/${pid}`, {
+      const res = await fetch(`${API_BASE_URL}/books/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export const useBookStore = create((set) => ({
 
       // Update the books state
       set((state) => ({
-        books: state.books.map((book) => (book._id === pid ? data.data : book)),
+        books: state.books.map((book) => (book._id === id ? data.data : book)),
       }));
       console.log("Book updated successfully:", data);
       return { success: true, message: "Book updated successfully."};  
