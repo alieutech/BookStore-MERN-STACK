@@ -25,23 +25,30 @@ Books: Manages book details such as title, author, publishYear, price
 Orders: Tracks orders placed by users, including items, payment status, and delivery updates.
 
 # # Dockerization
-# # Docker Setup
+Docker Setup
 The entire project is containerized using Docker to ensure consistency and portability across environments.
 
 # # Frontend (React.js):
 Dockerfile:
-```FROM node:18-alpine
+```FROM node:20-alpine
+
 WORKDIR /app
+
 COPY package.json ./
+
 RUN npm install
+
 COPY . .
+
 RUN npm run build
-EXPOSE 513
-CMD ["npm", "run", "start"]```
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]```
 
 Build & Run Commands:
 ```docker build -t bookstore-frontend .
-docker run --name bookstore-frontend -d -p 3000:3000 bookstore-frontend```
+docker run --name bookstore-frontend -d -p 5173:5173 bookstore-frontend```
 
 Backend (Node.js + Express.js):
 Dockerfile:
