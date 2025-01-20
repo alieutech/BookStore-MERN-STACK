@@ -59,13 +59,15 @@ docker run --name frontend -d -p 5173:5173 frontend
 
 # # Backend (Node.js + Express.js):
 Dockerfile:
-FROM node:18-alpine
+```
+ node:18-alpine
 WORKDIR /app
 COPY package.json ./
 RUN npm install
 COPY . .
 EXPOSE 3333
 CMD ["npm", "run", "dev"]
+```
 
 # # Build & Run Commands:
 
