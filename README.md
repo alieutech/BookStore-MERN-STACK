@@ -3,6 +3,7 @@
 Description:
 The BookStore application is a full-stack web platform built using the MERN stack (MongoDB, Express.js, React.js, and Node.js). It allows users to browse, purchase, and manage books online, with features tailored for both customers and administrators.
 
+
 # Key Features
 # # Frontend (React.js):
 User Authentication: Secure login and signup functionality using JWT or session-based authentication.
@@ -22,3 +23,68 @@ Data Models:
 Users: Stores user profiles, authentication credentials, and order history.
 Books: Manages book details such as title, author, publishYear, price
 Orders: Tracks orders placed by users, including items, payment status, and delivery updates.
+
+# # Dockerization
+# # Docker Setup
+The entire project is containerized using Docker to ensure consistency and portability across environments.
+
+# # Frontend (React.js):
+Dockerfile:
+```FROM node:18-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 513
+CMD ["npm", "run", "start"]```
+
+Build & Run Commands:
+```docker build -t bookstore-frontend .
+docker run --name bookstore-frontend -d -p 3000:3000 bookstore-frontend```
+
+Backend (Node.js + Express.js):
+Dockerfile:
+```FROM node:18-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+EXPOSE 3333
+CMD ["npm", "run", "start"]```
+
+Build & Run Commands:
+
+```docker build -t bookstore-backend .
+docker run --name bookstore-backend -d -p 3333:3333 bookstore-backend```
+Database (MongoDB):
+
+Run MongoDB using Docker:
+```docker run --name bookstore-mongodb -d -p 27017:27017 mongo
+Docker Compose
+To streamline the process, a docker-compose.yml file combines all services:```
+
+
+```version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3333:3333"
+    depends_on:
+      - database
+
+  database:
+    image: mongo
+    container_name: bookstore-mongodb
+    ports:
+      - "27017:27017"```
