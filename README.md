@@ -77,7 +77,7 @@ docker run --name bookstore-backend -d -p 3333:3333 backend
 
 Run MongoDB using Docker:
 ```
-docker run  --network=mern-stack name mongodb -d -p 27017:27017 ~/opt/data:/data/db mongodb:latest
+docker run --name mongodb --network=mern-stack -d -p 27017:27017 -v ~/opt/data:/data/db mongo:latest
 Docker Compose
 To streamline the process, a docker-compose.yml file combines all services:
 ```
