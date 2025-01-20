@@ -53,7 +53,7 @@ CMD ["npm", "run", "dev"]
 
 # # Build & Run Commands:
 ```
-docker build -t bookstore-frontend .
+docker build -t frontend .
 docker run --name bookstore-frontend -d -p 5173:5173 bookstore-frontend
 ```
 
@@ -65,17 +65,17 @@ COPY package.json ./
 RUN npm install
 COPY . .
 EXPOSE 3333
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
 
 # # Build & Run Commands:
 
 ```
-docker build -t bookstore-backend .
-docker run --name bookstore-backend -d -p 3333:3333 bookstore-backend
+docker build -t backend .
+docker run --name bookstore-backend -d -p 3333:3333 backend
 ```
-Database (MongoDB):
+# # Database (MongoDB):
 
-# # Run MongoDB using Docker:
+Run MongoDB using Docker:
 ```
 docker run --name bookstore-mongodb -d -p 27017:27017 mongo
 Docker Compose
