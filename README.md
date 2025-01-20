@@ -33,7 +33,8 @@ The entire project is containerized using Docker to ensure consistency and porta
 
 # # Frontend (React.js):
 Dockerfile:
-```FROM node:20-alpine
+```
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -48,12 +49,15 @@ RUN npm run build
 EXPOSE 5173
 
 CMD ["npm", "run", "dev"]
+```
 
-Build & Run Commands:
+# # Build & Run Commands:
+```
 docker build -t bookstore-frontend .
 docker run --name bookstore-frontend -d -p 5173:5173 bookstore-frontend
+```
 
-Backend (Node.js + Express.js):
+# # Backend (Node.js + Express.js):
 Dockerfile:
 FROM node:18-alpine
 WORKDIR /app
@@ -63,18 +67,23 @@ COPY . .
 EXPOSE 3333
 CMD ["npm", "run", "start"]
 
-Build & Run Commands:
+# # Build & Run Commands:
 
+```
 docker build -t bookstore-backend .
-docker run --name bookstore-backend -d -p 3333:3333 bookstore-backend```
+docker run --name bookstore-backend -d -p 3333:3333 bookstore-backend
+```
 Database (MongoDB):
 
-Run MongoDB using Docker:
+# # Run MongoDB using Docker:
+```
 docker run --name bookstore-mongodb -d -p 27017:27017 mongo
 Docker Compose
 To streamline the process, a docker-compose.yml file combines all services:
+```
 
 
+```
 version: '3.8'
 services:
   frontend:
@@ -97,7 +106,8 @@ services:
     image: mongo
     container_name: bookstore-mongodb
     ports:
-      - "27017:27017"```
+      - "27017:27017"
+```
 
 # # Collaboration Opportunities
 This project is open for collaboration! Contributions are welcome in the following areas:
