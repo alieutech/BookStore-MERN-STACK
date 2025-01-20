@@ -54,7 +54,7 @@ CMD ["npm", "run", "dev"]
 # # Build & Run Commands:
 ```
 docker build -t frontend .
-docker run --name bookstore-frontend -d -p 5173:5173 bookstore-frontend
+docker run --name frontend -d -p 5173:5173 frontend
 ```
 
 # # Backend (Node.js + Express.js):
@@ -71,7 +71,7 @@ CMD ["npm", "run", "dev"]
 
 ```
 docker build -t backend .
-docker run --name bookstore-backend -d -p 3333:3333 backend
+docker run --name backend -d -p 3333:3333 backend
 ```
 # # Database (MongoDB):
 
