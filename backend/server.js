@@ -13,7 +13,7 @@ mongoDB();
 
 // CORS configuration
 const corsOptions = {
-    origin: "http://localhost:5173", 
+    origin: "https://bookstore-mern-stack-1-a43x.onrender.com/", 
     methods: "GET,POST,PUT,DELETE", 
   };
   

@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/books": {
-        target: "http://localhost:3333", // Backend server 
+        target: ["https://bookstore-mern-stack-qi7g.onrender.com/", "http://localhost:3333"], // Backend server 
         changeOrigin: true,
       },
     },
