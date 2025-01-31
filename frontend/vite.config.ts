@@ -5,9 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0', // Allow access from external sources
     proxy: {
       "/books": {
-        target: ["https://bookstore-mern-stack-qi7g.onrender.com/", "http://localhost:3333"], // Backend server 
+        target: "http://localhost:3333", // Backend server 
         changeOrigin: true,
       },
     },

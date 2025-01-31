@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 // API Base URL 
-const API_BASE_URL = ["https://bookstore-mern-stack-qi7g.onrender.com/", "http://localhost:3333"];
+const API_BASE_URL = "http://localhost:3333";
 
 export const useBookStore = create((set) => ({
   books: [],
