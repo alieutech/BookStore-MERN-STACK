@@ -1,7 +1,7 @@
 import { Box, Button, Container, Heading, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
 import { useState } from "react";
-import { useBookStore } from "../store/book";
-import BookFormFields, { EMPTY_BOOK } from "../components/BookFormFields";
+import { EMPTY_BOOK, useBookStore } from "../store/book";
+import BookFormFields from "../components/BookFormFields";
 
 const CreatePage = () => {
 	const [newBook, setNewBook] = useState(EMPTY_BOOK);

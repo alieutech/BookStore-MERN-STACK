@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { request } from "../api/request";
 
+// A blank book for the create form
+export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", image: "", category: "", description: "", stock: "" };
+
 const hasAllFields = (book) =>
   book.title && book.author && book.publishYear && book.price && book.image;
 

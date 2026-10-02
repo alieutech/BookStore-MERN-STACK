@@ -4,8 +4,6 @@ import { FiUpload } from "react-icons/fi";
 import { request } from "../api/request";
 import { useBookStore } from "../store/book";
 
-export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", image: "", category: "", description: "", stock: "" };
-
 // The inputs shared by the "create book" page and the "edit book" dialog
 const BookFormFields = ({ book, onChange }) => {
 	const { categories, fetchCategories } = useBookStore();

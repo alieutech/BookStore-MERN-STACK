@@ -40,7 +40,7 @@ docker compose up --build
 The frontend dev server proxies `/books` to the backend, so the browser only talks to port 5173.
 
 ## Run locally without Docker
-Requires Node.js 20+ and a running MongoDB.
+Requires Node.js 22+ and a running MongoDB.
 
 Backend:
 ```
@@ -56,6 +56,24 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Tests
+Backend API tests (need a MongoDB; each test file uses its own `bookstore-test-*` database, which is dropped afterwards):
+```
+cd backend
+npm test                                         # uses mongodb://localhost:27017
+TEST_DATABASE_URI=mongodb://host:27017 npm test  # or another server
+```
+
+Frontend lint, unit tests and build:
+```
+cd frontend
+npm run lint
+npm test
+npm run build
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs all of these, plus `docker compose build`, on every pull request and push to `main`.
 
 ## Environment variables (backend)
 | Variable | Default | Description |

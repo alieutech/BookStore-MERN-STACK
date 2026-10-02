@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { useBookStore } from "../store/book";
 
-export const SORT_LABELS = {
+const SORT_LABELS = {
 	newest: "Newest first",
 	rating: "Top rated",
 	price_asc: "Price: low to high",
