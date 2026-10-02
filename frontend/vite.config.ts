@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Where the dev server forwards /books requests. In docker-compose this is the backend service.
+// Where the dev server forwards API requests. In docker-compose this is the backend service.
 const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:3333';
 
 // https://vite.dev/config/
@@ -11,6 +11,10 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/books': {
+        target: apiTarget,
+        changeOrigin: true,
+      },
+      '/auth': {
         target: apiTarget,
         changeOrigin: true,
       },

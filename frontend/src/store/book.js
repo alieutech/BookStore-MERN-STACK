@@ -1,21 +1,5 @@
 import { create } from "zustand";
-
-// API base URL. Empty by default so requests go through the Vite dev proxy
-// (see vite.config.ts); set VITE_API_URL to call the API directly.
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
-
-// Send a request and return the parsed JSON body, or throw with the server's message
-const request = async (path, options = {}) => {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.success === false) {
-    throw new Error(data.message || `Request failed with status ${res.status}`);
-  }
-  return data;
-};
+import { request } from "../api/request";
 
 const hasAllFields = (book) =>
   book.title && book.author && book.publishYear && book.price && book.image;

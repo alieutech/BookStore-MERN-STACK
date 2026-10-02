@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useBookStore } from "../store/book";
 import BookCard from "../components/BookCard";
+import { useIsAdmin } from "../store/auth";
 
 const HomePage = () => {
 	const { fetchBooks, books } = useBookStore();
+	const isAdmin = useIsAdmin();
 
 	useEffect(() => {
 		fetchBooks();
@@ -41,11 +43,13 @@ const HomePage = () => {
 				{books.length === 0 && (
 					<Text fontSize='xl' textAlign={"center"} fontWeight='bold' color='gray.500'>
 						Ohh no books are found 😢{" "}
-						<Link to={"/create"}>
-							<Text as='span' color='blue.500' _hover={{ textDecoration: "underline" }}>
-								Create a book
-							</Text>
-						</Link>
+						{isAdmin && (
+							<Link to={"/create"}>
+								<Text as='span' color='blue.500' _hover={{ textDecoration: "underline" }}>
+									Create a book
+								</Text>
+							</Link>
+						)}
 					</Text>
 				)}
 			</VStack>

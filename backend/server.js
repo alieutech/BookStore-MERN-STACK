@@ -5,6 +5,11 @@ const path = require('path');
 const connectDB = require('./config/config');
 const errorHandler = require('./middleware/errorHandler');
 
+if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET is not set. Copy backend/.env.example to backend/.env and fill it in.');
+    process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3333;
 
@@ -19,6 +24,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use('/auth', require('./routers/auth'));
 app.use('/books', require('./routers/books'));
 
 // Serve the built frontend in production (run `npm run build` from the repo root first)

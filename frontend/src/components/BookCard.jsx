@@ -22,6 +22,7 @@ import {
 	VStack,
 } from "@chakra-ui/react";
 import { useBookStore } from "../store/book";
+import { useIsAdmin } from "../store/auth";
 import { useState } from "react";
 
 const BookCard = ({ book }) => {
@@ -31,6 +32,7 @@ const BookCard = ({ book }) => {
 	const bg = useColorModeValue("white", "gray.800");
 
 	const { deleteBook, updateBook } = useBookStore();
+	const isAdmin = useIsAdmin();
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -103,8 +105,10 @@ const BookCard = ({ book }) => {
 					D{book.price}
 				</Text>
 
+				{isAdmin && (
 				<HStack spacing={2}>
 					<IconButton
+						aria-label='Edit book'
 						icon={<MdEdit />}
 						onClick={() => {
 							setUpdatedBook(book);
@@ -113,11 +117,13 @@ const BookCard = ({ book }) => {
 						colorScheme='blue'
 					/>
 					<IconButton
+						aria-label='Delete book'
 						icon={<MdDelete />}
 						onClick={() => handleDeleteBook(book._id)}
 						colorScheme='red'
 					/>
 				</HStack>
+				)}
 			</Box>
 
 			<Modal isOpen={isOpen} onClose={onClose}>
