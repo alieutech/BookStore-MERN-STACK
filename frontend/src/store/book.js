@@ -15,9 +15,11 @@ export const useBookStore = create((set) => ({
     try {
       const data = await request("/books");
       set({ books: data.data || [] });
+      return true;
     } catch (err) {
       console.error("Error fetching books:", err);
       set({ books: [] });
+      return false;
     }
   },
 

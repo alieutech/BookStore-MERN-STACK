@@ -72,6 +72,13 @@ Anyone can browse books. Only admins can add, edit or delete them.
 
 To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Docker Compose uses `admin@example.com` unless you set `ADMIN_EMAILS`). Everyone else gets the normal `user` role.
 
+## Shopping
+- Anyone can add books to the cart (it is saved in the browser and always uses the latest prices).
+- Checking out needs an account. Customers enter a shipping address and pay cash on delivery.
+- Customers see their orders under **My orders** and can cancel an order while it is still `pending`.
+- Admins see every order under **Orders** and move it through `pending` → `processing` → `shipped` → `delivered` (or `cancelled`).
+- Order totals are calculated on the server from the database prices, and each order keeps a copy of the title and price at the time it was placed.
+
 ## API
 | Method | Route | Access | Description |
 | --- | --- | --- | --- |
@@ -83,6 +90,12 @@ To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Doc
 | POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
 | PUT | `/books/:id` | Admin | Update the fields sent in the body |
 | DELETE | `/books/:id` | Admin | Delete a book |
+| POST | `/orders` | Logged in | Place an order: `items: [{ book, quantity }]`, `shippingAddress: { fullName, phone, address, city, country }` |
+| GET | `/orders/mine` | Logged in | Your orders, newest first |
+| GET | `/orders/:id` | Owner or admin | Get one order |
+| PUT | `/orders/:id/cancel` | Owner | Cancel a `pending` order |
+| GET | `/orders` | Admin | All orders, with the customer's name and email |
+| PUT | `/orders/:id/status` | Admin | Set `status` to `pending`, `processing`, `shipped`, `delivered` or `cancelled` |
 
 Register and login return `data: { user, token }`. Send the token on protected routes as `Authorization: Bearer <token>`.
 

@@ -1,4 +1,5 @@
 import { 
+  Badge,
   Button, 
   Container, 
   Flex, 
@@ -10,6 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuthStore, useIsAdmin } from "../store/auth";
+import { useCartCount } from "../store/cart";
+import { FiShoppingCart } from "react-icons/fi";
 import { AiOutlinePlusSquare } from "react-icons/ai";
 import { IoMoon } from "react-icons/io5";
 import { LuSun } from "react-icons/lu";
@@ -21,6 +24,7 @@ const NavBar = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const isAdmin = useIsAdmin();
+  const cartCount = useCartCount();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -58,8 +62,19 @@ const NavBar = () => {
               </Button>
             </Link>
           )}
+          <Button as={RouterLink} to={"/cart"} aria-label={`Cart, ${cartCount} items`} position="relative">
+            <FiShoppingCart fontSize={20} />
+            {cartCount > 0 && (
+              <Badge colorScheme="red" rounded="full" position="absolute" top="-1" right="-1" fontSize="xs">
+                {cartCount}
+              </Badge>
+            )}
+          </Button>
           {user ? (
             <>
+              <Button as={RouterLink} to={isAdmin ? "/admin/orders" : "/my-orders"} variant="ghost">
+                {isAdmin ? "Orders" : "My orders"}
+              </Button>
               <Text display={{ base: "none", md: "block" }}>Hi, {user.name}</Text>
               <Button onClick={handleLogout}>Log out</Button>
             </>
