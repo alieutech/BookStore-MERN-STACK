@@ -51,7 +51,6 @@ describe('books', () => {
 
     describe('search, filters and sorting', () => {
         before(async () => {
-            await api.delete('/books'); // no-op; keeps the data set below predictable
             await createBook(admin.token, { title: 'Refactoring', author: 'Martin Fowler', price: 20, category: 'Programming' });
             await createBook(admin.token, { title: 'Dune', author: 'Frank Herbert', price: 9.99, category: 'Fiction' });
             await createBook(admin.token, { title: 'Sapiens', author: 'Yuval Harari', price: 15, category: 'History' });
