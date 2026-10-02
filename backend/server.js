@@ -6,14 +6,21 @@ const connectDB = require('./config/config');
 const Books = require('./models/Books');
 const { UPLOAD_DIR } = require('./config/uploads');
 const errorHandler = require('./middleware/errorHandler');
+const { securityHeaders, authLimiter, apiLimiter, checkJwtSecret } = require('./middleware/security');
 
-if (!process.env.JWT_SECRET) {
-    console.error('JWT_SECRET is not set. Copy backend/.env.example to backend/.env and fill it in.');
+const secretProblem = checkJwtSecret();
+if (secretProblem) {
+    console.error(secretProblem);
     process.exit(1);
 }
 
 const app = express();
 const PORT = process.env.PORT || 3333;
+
+// Behind a reverse proxy (nginx, a load balancer...) set TRUST_PROXY=1 so rate limits see the real client IP
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY);
+
+app.use(securityHeaders);
 
 // CORS configuration (comma-separated list of allowed origins)
 const corsOptions = {
@@ -22,10 +29,12 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// parse JSON and urlencoded form data
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// parse JSON and urlencoded form data (small bodies only; images go through /uploads)
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
+app.use(['/auth', '/books', '/orders', '/reports', '/uploads'], apiLimiter);
+app.use(['/auth/login', '/auth/register'], authLimiter);
 app.use('/auth', require('./routers/auth'));
 app.use('/books', require('./routers/books'));
 app.use('/orders', require('./routers/orders'));

@@ -63,9 +63,12 @@ npm run dev
 | `DATABASE_URI` | (required) | MongoDB connection string |
 | `PORT` | `3333` | Port the API listens on |
 | `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated origins allowed to call the API |
-| `JWT_SECRET` | (required) | Secret used to sign login tokens — use a long random string |
+| `JWT_SECRET` | (required) | Secret used to sign login tokens. In production it must be at least 32 random characters (`openssl rand -hex 32`) |
 | `JWT_EXPIRES_IN` | `7d` | How long a login lasts |
 | `UPLOAD_DIR` | `backend/uploads` | Folder where uploaded cover images are stored |
+| `TRUST_PROXY` | (off) | Set to `1` behind a reverse proxy so rate limits see the real client IP |
+| `AUTH_RATE_LIMIT` | `10` | Failed logins/sign-ups allowed per IP per 15 minutes |
+| `API_RATE_LIMIT` | `1000` | API requests allowed per IP per 15 minutes |
 | `ADMIN_EMAILS` | (empty) | Comma-separated emails that get the admin role when they register |
 
 ## Users and admins
@@ -89,6 +92,13 @@ Admins get a **Dashboard** (`/admin`) with revenue, order and customer totals, a
 
 ## Cover images
 Admins can paste an image URL or click **Upload** in the book form. Uploads are checked by their contents (not just the file name), given a random name, stored in `UPLOAD_DIR` and served from `/uploads/...`. Replacing or deleting a book's cover removes the old uploaded file. Docker Compose keeps uploads in the `uploads` volume.
+
+## Security
+- Passwords are hashed with bcrypt; login tokens are signed JWTs.
+- Security headers via [helmet](https://helmetjs.github.io/), including a Content-Security-Policy for the built frontend.
+- Rate limits: 10 failed logins/sign-ups and 1000 API requests per IP per 15 minutes (configurable).
+- Request bodies are limited to 100 KB (uploads: 2 MB images only).
+- In production the server refuses to start with a short or example `JWT_SECRET`.
 
 ## Reviews
 Every book has its own page (`/book/:id`) with its description and reviews. Logged-in users can leave one review per book (1–5 stars and an optional comment) and update or delete it later; admins can delete any review. Reviews from customers who ordered the book are marked **Verified purchase**. Average ratings show on every book card and books can be sorted by **Top rated**.

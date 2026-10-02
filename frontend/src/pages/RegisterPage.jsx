@@ -12,7 +12,7 @@ const RegisterPage = () => {
 			fields={[
 				{ name: "name", placeholder: "Name", autoComplete: "name" },
 				{ name: "email", type: "email", placeholder: "Email", autoComplete: "email" },
-				{ name: "password", type: "password", placeholder: "Password (at least 8 characters)", autoComplete: "new-password" },
+				{ name: "password", type: "password", placeholder: "Password (8 to 72 characters)", autoComplete: "new-password" },
 			]}
 			footer={{ text: "Already have an account?", linkLabel: "Log in", to: "/login" }}
 		/>
