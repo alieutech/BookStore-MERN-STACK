@@ -18,6 +18,14 @@ export default defineConfig({
         target: apiTarget,
         changeOrigin: true,
       },
+      '/uploads': {
+        target: apiTarget,
+        changeOrigin: true,
+      },
+      '/reports': {
+        target: apiTarget,
+        changeOrigin: true,
+      },
       // API only: the order pages in the app live under /my-orders and /admin/orders
       '/orders': {
         target: apiTarget,

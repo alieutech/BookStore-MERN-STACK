@@ -4,6 +4,9 @@ const User = require('../models/User');
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
+// bcrypt only looks at the first 72 bytes, and very long inputs just waste CPU
+const MAX_PASSWORD_LENGTH = 72;
+const MAX_NAME_LENGTH = 100;
 
 // Emails listed in ADMIN_EMAILS get the admin role when they register
 const adminEmails = () =>
@@ -28,8 +31,11 @@ const register = async (req, res, next) => {
     if (!EMAIL_PATTERN.test(email)) {
         return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
     }
-    if (password.length < MIN_PASSWORD_LENGTH) {
-        return res.status(400).json({ success: false, message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` });
+    if (password.length < MIN_PASSWORD_LENGTH || Buffer.byteLength(password) > MAX_PASSWORD_LENGTH) {
+        return res.status(400).json({ success: false, message: `Password must be ${MIN_PASSWORD_LENGTH} to ${MAX_PASSWORD_LENGTH} characters.` });
+    }
+    if (name.trim().length > MAX_NAME_LENGTH) {
+        return res.status(400).json({ success: false, message: `Name must be at most ${MAX_NAME_LENGTH} characters.` });
     }
     try {
         const normalizedEmail = email.trim().toLowerCase();
@@ -53,6 +59,9 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     if (!allStrings(email, password)) {
         return res.status(400).json({ success: false, message: 'email and password are required.' });
+    }
+    if (Buffer.byteLength(password) > MAX_PASSWORD_LENGTH) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
     try {
         const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');

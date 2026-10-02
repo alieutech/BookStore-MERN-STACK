@@ -40,7 +40,7 @@ docker compose up --build
 The frontend dev server proxies `/books` to the backend, so the browser only talks to port 5173.
 
 ## Run locally without Docker
-Requires Node.js 20+ and a running MongoDB.
+Requires Node.js 22+ and a running MongoDB.
 
 Backend:
 ```
@@ -57,14 +57,36 @@ npm install
 npm run dev
 ```
 
+## Tests
+Backend API tests (need a MongoDB; each test file uses its own `bookstore-test-*` database, which is dropped afterwards):
+```
+cd backend
+npm test                                         # uses mongodb://localhost:27017
+TEST_DATABASE_URI=mongodb://host:27017 npm test  # or another server
+```
+
+Frontend lint, unit tests and build:
+```
+cd frontend
+npm run lint
+npm test
+npm run build
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs all of these, plus `docker compose build`, on every pull request and push to `main`.
+
 ## Environment variables (backend)
 | Variable | Default | Description |
 | --- | --- | --- |
 | `DATABASE_URI` | (required) | MongoDB connection string |
 | `PORT` | `3333` | Port the API listens on |
 | `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated origins allowed to call the API |
-| `JWT_SECRET` | (required) | Secret used to sign login tokens — use a long random string |
+| `JWT_SECRET` | (required) | Secret used to sign login tokens. In production it must be at least 32 random characters (`openssl rand -hex 32`) |
 | `JWT_EXPIRES_IN` | `7d` | How long a login lasts |
+| `UPLOAD_DIR` | `backend/uploads` | Folder where uploaded cover images are stored |
+| `TRUST_PROXY` | (off) | Set to `1` behind a reverse proxy so rate limits see the real client IP |
+| `AUTH_RATE_LIMIT` | `10` | Failed logins/sign-ups allowed per IP per 15 minutes |
+| `API_RATE_LIMIT` | `1000` | API requests allowed per IP per 15 minutes |
 | `ADMIN_EMAILS` | (empty) | Comma-separated emails that get the admin role when they register |
 
 ## Users and admins
@@ -79,21 +101,47 @@ To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Doc
 - Admins see every order under **Orders** and move it through `pending` → `processing` → `shipped` → `delivered` (or `cancelled`).
 - Order totals are calculated on the server from the database prices, and each order keeps a copy of the title and price at the time it was placed.
 
+## Inventory and dashboard
+Each book has a `stock` count. Placing an order takes the copies out of stock (an order that asks for more than is left is refused, and two customers can never buy the same last copy); cancelling an order puts them back. Books show **In stock**, **Only N left** or **Out of stock**, and the cart won't let you add more than are available.
+
+Admins get a **Dashboard** (`/admin`) with revenue, order and customer totals, a 30-day revenue chart (with a table view), orders by status, best sellers and books that are running low.
+
+> Books that existed before stock tracking start with a stock of 0 — edit them to set their stock.
+
+## Cover images
+Admins can paste an image URL or click **Upload** in the book form. Uploads are checked by their contents (not just the file name), given a random name, stored in `UPLOAD_DIR` and served from `/uploads/...`. Replacing or deleting a book's cover removes the old uploaded file. Docker Compose keeps uploads in the `uploads` volume.
+
+## Security
+- Passwords are hashed with bcrypt; login tokens are signed JWTs.
+- Security headers via [helmet](https://helmetjs.github.io/), including a Content-Security-Policy for the built frontend.
+- Rate limits: 10 failed logins/sign-ups and 1000 API requests per IP per 15 minutes (configurable).
+- Request bodies are limited to 100 KB (uploads: 2 MB images only).
+- In production the server refuses to start with a short or example `JWT_SECRET`.
+
+## Reviews
+Every book has its own page (`/book/:id`) with its description and reviews. Logged-in users can leave one review per book (1–5 stars and an optional comment) and update or delete it later; admins can delete any review. Reviews from customers who ordered the book are marked **Verified purchase**. Average ratings show on every book card and books can be sorted by **Top rated**.
+
 ## API
 | Method | Route | Access | Description |
 | --- | --- | --- | --- |
 | POST | `/auth/register` | Public | Create an account (`name`, `email`, `password` of 8+ characters) |
 | POST | `/auth/login` | Public | Log in with `email` and `password` |
 | GET | `/auth/me` | Logged in | Get the current user |
-| GET | `/books` | Public | List all books |
+| GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `title`, `rating`) |
+| GET | `/books/categories` | Public | Categories that have at least one book |
 | GET | `/books/:id` | Public | Get one book |
-| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
+| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`, optional `category`, `description` and `stock`) |
 | PUT | `/books/:id` | Admin | Update the fields sent in the body |
 | DELETE | `/books/:id` | Admin | Delete a book |
+| GET | `/books/:id/reviews` | Public | Reviews of a book, newest first |
+| POST | `/books/:id/reviews` | Logged in | Add or update your review: `rating` (1–5), optional `comment` (max 1000 characters) |
+| DELETE | `/books/:id/reviews/:reviewId` | Author or admin | Delete a review |
 | POST | `/orders` | Logged in | Place an order: `items: [{ book, quantity }]`, `shippingAddress: { fullName, phone, address, city, country }` |
 | GET | `/orders/mine` | Logged in | Your orders, newest first |
 | GET | `/orders/:id` | Owner or admin | Get one order |
 | PUT | `/orders/:id/cancel` | Owner | Cancel a `pending` order |
+| POST | `/uploads` | Admin | Upload a cover image (multipart field `image`; JPEG, PNG, GIF or WebP up to 2 MB). Returns `data.url` to use as the book's `image` |
+| GET | `/reports/sales` | Admin | Dashboard numbers: totals, orders by status, revenue for the last 30 days, best sellers, low stock |
 | GET | `/orders` | Admin | All orders, with the customer's name and email |
 | PUT | `/orders/:id/status` | Admin | Set `status` to `pending`, `processing`, `shipped`, `delivered` or `cancelled` |
 

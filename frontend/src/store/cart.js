@@ -7,21 +7,21 @@ const MAX_QUANTITY = 99;
 // Titles and prices are always read from the latest book list, so they never go stale.
 export const useCartStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [], // [{ bookId, quantity }]
 
-      addItem: (bookId) =>
-        set((state) => {
-          const existing = state.items.find((item) => item.bookId === bookId);
-          if (existing) {
-            return {
-              items: state.items.map((item) =>
-                item.bookId === bookId ? { ...item, quantity: Math.min(item.quantity + 1, MAX_QUANTITY) } : item
-              ),
-            };
-          }
-          return { items: [...state.items, { bookId, quantity: 1 }] };
-        }),
+      // Add one copy, up to `max` (the copies in stock). Returns false when the limit is reached.
+      addItem: (bookId, max = MAX_QUANTITY) => {
+        const limit = Math.min(max, MAX_QUANTITY);
+        const existing = get().items.find((item) => item.bookId === bookId);
+        if ((existing?.quantity || 0) >= limit) return false;
+        set((state) => ({
+          items: existing
+            ? state.items.map((item) => (item.bookId === bookId ? { ...item, quantity: item.quantity + 1 } : item))
+            : [...state.items, { bookId, quantity: 1 }],
+        }));
+        return true;
+      },
 
       setQuantity: (bookId, quantity) =>
         set((state) => ({

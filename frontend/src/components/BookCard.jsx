@@ -1,13 +1,13 @@
 import { MdDelete, MdEdit } from 'react-icons/md';
 
 import {
+	Badge,
 	Box,
 	Button,
 	Heading,
 	HStack,
 	IconButton,
 	Image,
-	Input,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -22,8 +22,12 @@ import {
 	VStack,
 } from "@chakra-ui/react";
 import { useBookStore } from "../store/book";
+import BookFormFields from "./BookFormFields";
+import { StarRating } from "./StarRating";
+import { Link as RouterLink } from "react-router-dom";
 import { useIsAdmin } from "../store/auth";
-import { useCartStore } from "../store/cart";
+import { useAddToCart } from "../hooks/useAddToCart";
+import StockBadge from "./StockBadge";
 import { formatPrice } from "../utils/format";
 import { FiShoppingCart } from "react-icons/fi";
 import { useState } from "react";
@@ -36,20 +40,9 @@ const BookCard = ({ book }) => {
 
 	const { deleteBook, updateBook } = useBookStore();
 	const isAdmin = useIsAdmin();
-	const addToCart = useCartStore((state) => state.addItem);
+	const addToCart = useAddToCart();
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
-
-	const handleAddToCart = () => {
-		addToCart(book._id);
-		toast({
-			title: "Added to cart",
-			description: `"${book.title}" is in your cart.`,
-			status: "success",
-			duration: 2000,
-			isClosable: true,
-		});
-	};
 
 	const handleDeleteBook = async (id) => {
 		const { success, message } = await deleteBook(id);
@@ -103,12 +96,21 @@ const BookCard = ({ book }) => {
 			_hover={{ transform: "translateY(-5px)", shadow: "xl" }}
 			bg={bg}
 		>
-			<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
+			<RouterLink to={`/book/${book._id}`}>
+				<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
+			</RouterLink>
 
 			<Box p={4}>
+				<HStack mb={2} spacing={2}>
+					{book.category && <Badge colorScheme='purple'>{book.category}</Badge>}
+					<StockBadge stock={book.stock} />
+				</HStack>
 				<Heading as='h3' size='md' mb={2}>
-					{book.title}
+					<RouterLink to={`/book/${book._id}`}>{book.title}</RouterLink>
 				</Heading>
+				<Box mb={2}>
+					<StarRating value={book.averageRating || 0} count={book.numReviews || 0} size='14px' />
+				</Box>
 				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
 					{book.author}
 				</Text>
@@ -121,8 +123,8 @@ const BookCard = ({ book }) => {
 				</Text>
 
 				<HStack spacing={2}>
-					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={handleAddToCart} flex='1'>
-						Add to cart
+					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={() => addToCart(book)} flex='1' isDisabled={!book.stock}>
+						{book.stock ? "Add to cart" : "Sold out"}
 					</Button>
 				{isAdmin && (
 				<>
@@ -154,38 +156,7 @@ const BookCard = ({ book }) => {
 					<ModalCloseButton />
 					<ModalBody>
 						<VStack spacing={4}>
-							<Input
-								placeholder='Book Title'
-								name='title'
-								value={updatedBook.title}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, title: e.target.value })}
-							/>
-							<Input
-								placeholder='Author'
-								name='author'
-								value={updatedBook.author}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, author: e.target.value })}
-							/>
-							<Input
-								placeholder='Publish Year'
-								name='publishYear'
-								type='number'
-								value={updatedBook.publishYear}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, publishYear: e.target.value })}
-							/>
-							<Input
-								placeholder='Price'
-								name='price'
-								type='number'
-								value={updatedBook.price}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, price: e.target.value })}
-							/>
-							<Input
-								placeholder='Image URL'
-								name='image'
-								value={updatedBook.image}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, image: e.target.value })}
-							/>
+							<BookFormFields book={updatedBook} onChange={setUpdatedBook} />
 						</VStack>
 					</ModalBody>
 
