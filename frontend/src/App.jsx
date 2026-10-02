@@ -6,7 +6,10 @@ import CreatePage from "./pages/CreatePage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import NavBar from "./components/NavBar"
-import AdminRoute from "./components/AdminRoute"
+import ProtectedRoute from "./components/ProtectedRoute"
+import CartPage from "./pages/CartPage"
+import CheckoutPage from "./pages/CheckoutPage"
+import OrdersPage from "./pages/OrdersPage"
 import { useAuthStore } from "./store/auth"
 
 
@@ -24,7 +27,11 @@ const App = () => {
       <NavBar />
       <Routes>
           <Route path="/" element={< HomePage />}/>
-          <Route path="/create" element={<AdminRoute><CreatePage /></AdminRoute>}/>
+          <Route path="/create" element={<ProtectedRoute adminOnly><CreatePage /></ProtectedRoute>}/>
+          <Route path="/cart" element={< CartPage />}/>
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}/>
+          <Route path="/my-orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>}/>
+          <Route path="/admin/orders" element={<ProtectedRoute adminOnly><OrdersPage isAdminView /></ProtectedRoute>}/>
           <Route path="/login" element={< LoginPage />}/>
           <Route path="/register" element={< RegisterPage />}/>
       </Routes>

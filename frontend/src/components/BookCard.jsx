@@ -23,6 +23,9 @@ import {
 } from "@chakra-ui/react";
 import { useBookStore } from "../store/book";
 import { useIsAdmin } from "../store/auth";
+import { useCartStore } from "../store/cart";
+import { formatPrice } from "../utils/format";
+import { FiShoppingCart } from "react-icons/fi";
 import { useState } from "react";
 
 const BookCard = ({ book }) => {
@@ -33,8 +36,20 @@ const BookCard = ({ book }) => {
 
 	const { deleteBook, updateBook } = useBookStore();
 	const isAdmin = useIsAdmin();
+	const addToCart = useCartStore((state) => state.addItem);
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
+
+	const handleAddToCart = () => {
+		addToCart(book._id);
+		toast({
+			title: "Added to cart",
+			description: `"${book.title}" is in your cart.`,
+			status: "success",
+			duration: 2000,
+			isClosable: true,
+		});
+	};
 
 	const handleDeleteBook = async (id) => {
 		const { success, message } = await deleteBook(id);
@@ -102,11 +117,15 @@ const BookCard = ({ book }) => {
 				</Text>
 
 				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
-					D{book.price}
+					{formatPrice(book.price)}
 				</Text>
 
-				{isAdmin && (
 				<HStack spacing={2}>
+					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={handleAddToCart} flex='1'>
+						Add to cart
+					</Button>
+				{isAdmin && (
+				<>
 					<IconButton
 						aria-label='Edit book'
 						icon={<MdEdit />}
@@ -122,8 +141,9 @@ const BookCard = ({ book }) => {
 						onClick={() => handleDeleteBook(book._id)}
 						colorScheme='red'
 					/>
-				</HStack>
+				</>
 				)}
+				</HStack>
 			</Box>
 
 			<Modal isOpen={isOpen} onClose={onClose}>

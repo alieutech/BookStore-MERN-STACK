@@ -26,6 +26,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/auth', require('./routers/auth'));
 app.use('/books', require('./routers/books'));
+app.use('/orders', require('./routers/orders'));
 
 // Serve the built frontend in production (run `npm run build` from the repo root first)
 if (process.env.NODE_ENV === 'production') {
