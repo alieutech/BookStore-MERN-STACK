@@ -22,6 +22,8 @@ services:
       - CORS_ORIGIN=http://localhost:5173
       - JWT_SECRET=${JWT_SECRET:-dev-only-secret-change-me}
       - ADMIN_EMAILS=${ADMIN_EMAILS:-admin@example.com}
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       - mongo
     networks:
@@ -43,4 +45,6 @@ networks:
 
 volumes:
   mongo-data:
+    driver: local
+  uploads:
     driver: local

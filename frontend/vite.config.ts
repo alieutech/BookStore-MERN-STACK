@@ -18,6 +18,10 @@ export default defineConfig({
         target: apiTarget,
         changeOrigin: true,
       },
+      '/uploads': {
+        target: apiTarget,
+        changeOrigin: true,
+      },
       '/reports': {
         target: apiTarget,
         changeOrigin: true,

@@ -65,6 +65,7 @@ npm run dev
 | `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated origins allowed to call the API |
 | `JWT_SECRET` | (required) | Secret used to sign login tokens — use a long random string |
 | `JWT_EXPIRES_IN` | `7d` | How long a login lasts |
+| `UPLOAD_DIR` | `backend/uploads` | Folder where uploaded cover images are stored |
 | `ADMIN_EMAILS` | (empty) | Comma-separated emails that get the admin role when they register |
 
 ## Users and admins
@@ -85,6 +86,9 @@ Each book has a `stock` count. Placing an order takes the copies out of stock (a
 Admins get a **Dashboard** (`/admin`) with revenue, order and customer totals, a 30-day revenue chart (with a table view), orders by status, best sellers and books that are running low.
 
 > Books that existed before stock tracking start with a stock of 0 — edit them to set their stock.
+
+## Cover images
+Admins can paste an image URL or click **Upload** in the book form. Uploads are checked by their contents (not just the file name), given a random name, stored in `UPLOAD_DIR` and served from `/uploads/...`. Replacing or deleting a book's cover removes the old uploaded file. Docker Compose keeps uploads in the `uploads` volume.
 
 ## Reviews
 Every book has its own page (`/book/:id`) with its description and reviews. Logged-in users can leave one review per book (1–5 stars and an optional comment) and update or delete it later; admins can delete any review. Reviews from customers who ordered the book are marked **Verified purchase**. Average ratings show on every book card and books can be sorted by **Top rated**.
@@ -108,6 +112,7 @@ Every book has its own page (`/book/:id`) with its description and reviews. Logg
 | GET | `/orders/mine` | Logged in | Your orders, newest first |
 | GET | `/orders/:id` | Owner or admin | Get one order |
 | PUT | `/orders/:id/cancel` | Owner | Cancel a `pending` order |
+| POST | `/uploads` | Admin | Upload a cover image (multipart field `image`; JPEG, PNG, GIF or WebP up to 2 MB). Returns `data.url` to use as the book's `image` |
 | GET | `/reports/sales` | Admin | Dashboard numbers: totals, orders by status, revenue for the last 30 days, best sellers, low stock |
 | GET | `/orders` | Admin | All orders, with the customer's name and email |
 | PUT | `/orders/:id/status` | Admin | Set `status` to `pending`, `processing`, `shipped`, `delivered` or `cancelled` |

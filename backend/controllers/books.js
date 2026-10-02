@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Books = require('../models/Books');
 const Review = require('../models/Review');
+const { removeUploadedImage } = require('../config/uploads');
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -86,10 +87,13 @@ const updateBooks = async (req, res, next) => {
         for (const field of BOOK_FIELDS) {
             if (req.body[field] !== undefined) updates[field] = req.body[field];
         }
-        const book = await Books.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
-        if (!book) {
+        const previous = await Books.findById(id);
+        if (!previous) {
             return res.status(404).json({ success: false, message: `No book matches ID ${id}.` });
         }
+        const book = await Books.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+        // The old cover is no longer used once it has been replaced
+        if (book && previous.image !== book.image) await removeUploadedImage(previous.image);
         res.status(200).json({ success: true, message: 'Book updated successfully.', data: book });
     } catch (err) {
         next(err);
@@ -125,6 +129,7 @@ const deleteBook = async (req, res, next) => {
             return res.status(404).json({ success: false, message: `No book matches ID ${id}.` });
         }
         await Review.deleteMany({ book: id });
+        await removeUploadedImage(book.image);
         res.status(200).json({ success: true, message: `Book with ID ${id} deleted successfully.`, data: book });
     } catch (err) {
         next(err);

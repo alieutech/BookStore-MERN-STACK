@@ -1,5 +1,7 @@
-import { Input, Textarea } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { Button, HStack, Image, Input, Textarea, useToast } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+import { FiUpload } from "react-icons/fi";
+import { request } from "../api/request";
 import { useBookStore } from "../store/book";
 
 export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", image: "", category: "", description: "", stock: "" };
@@ -8,6 +10,25 @@ export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", i
 const BookFormFields = ({ book, onChange }) => {
 	const { categories, fetchCategories } = useBookStore();
 	const set = (field) => (e) => onChange({ ...book, [field]: e.target.value });
+	const fileInput = useRef(null);
+	const [isUploading, setIsUploading] = useState(false);
+	const toast = useToast();
+
+	const handleUpload = async (e) => {
+		const file = e.target.files?.[0];
+		e.target.value = ""; // allow choosing the same file again
+		if (!file) return;
+		const form = new FormData();
+		form.append("image", file);
+		setIsUploading(true);
+		try {
+			const { data } = await request("/uploads", { method: "POST", body: form });
+			onChange({ ...book, image: data.url });
+		} catch (err) {
+			toast({ title: "Upload failed", description: err.message, status: "error", duration: 4000, isClosable: true });
+		}
+		setIsUploading(false);
+	};
 
 	useEffect(() => {
 		fetchCategories();
@@ -26,7 +47,14 @@ const BookFormFields = ({ book, onChange }) => {
 					<option key={category} value={category} />
 				))}
 			</datalist>
-			<Input placeholder='Image URL' name='image' type='url' value={book.image} onChange={set("image")} />
+			<HStack w='full'>
+				{book.image && <Image src={book.image} alt='Cover preview' boxSize='10' objectFit='cover' rounded='md' />}
+				<Input placeholder='Image URL, or upload a file' name='image' value={book.image} onChange={set("image")} />
+				<Button leftIcon={<FiUpload />} onClick={() => fileInput.current?.click()} isLoading={isUploading} flexShrink={0}>
+					Upload
+				</Button>
+				<input ref={fileInput} type='file' accept='image/jpeg,image/png,image/gif,image/webp' hidden onChange={handleUpload} data-testid='image-file' />
+			</HStack>
 			<Textarea placeholder='Description' name='description' rows={4} value={book.description || ""} onChange={set("description")} />
 		</>
 	);

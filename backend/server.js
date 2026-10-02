@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/config');
 const Books = require('./models/Books');
+const { UPLOAD_DIR } = require('./config/uploads');
 const errorHandler = require('./middleware/errorHandler');
 
 if (!process.env.JWT_SECRET) {
@@ -29,6 +30,12 @@ app.use('/auth', require('./routers/auth'));
 app.use('/books', require('./routers/books'));
 app.use('/orders', require('./routers/orders'));
 app.use('/reports', require('./routers/reports'));
+app.use('/uploads', require('./routers/uploads'));
+// Uploaded cover images; nosniff stops browsers from treating them as anything but images
+app.use('/uploads', express.static(UPLOAD_DIR, {
+    maxAge: '7d',
+    setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff'),
+}));
 
 // Serve the built frontend in production (run `npm run build` from the repo root first)
 if (process.env.NODE_ENV === 'production') {
