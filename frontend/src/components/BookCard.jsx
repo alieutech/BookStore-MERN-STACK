@@ -21,7 +21,7 @@ import {
 	useToast,
 	VStack,
 } from "@chakra-ui/react";
-import { useBookStore } from "../../Store/book";
+import { useBookStore } from "../store/book";
 import { useState } from "react";
 
 const BookCard = ({ book }) => {
@@ -57,7 +57,6 @@ const BookCard = ({ book }) => {
 
 	const handleUpdateBook = async (id, updatedBook) => {
 		const { success, message } = await updateBook(id, updatedBook);
-		onClose();
 		if (!success) {
 			toast({
 				title: "Error",
@@ -67,9 +66,10 @@ const BookCard = ({ book }) => {
 				isClosable: true,
 			});
 		} else {
+			onClose();
 			toast({
 				title: "Success",
-				description: "Book updated successfully",
+				description: message,
 				status: "success",
 				duration: 3000,
 				isClosable: true,
@@ -99,12 +99,19 @@ const BookCard = ({ book }) => {
 				Publish_Year:  {book.publishYear}
 				</Text>
 
-				{/* <Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
+				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
 					D{book.price}
-				</Text> */}
+				</Text>
 
 				<HStack spacing={2}>
-					<IconButton icon={<MdEdit />} onClick={onOpen} colorScheme='blue' />
+					<IconButton
+						icon={<MdEdit />}
+						onClick={() => {
+							setUpdatedBook(book);
+							onOpen();
+						}}
+						colorScheme='blue'
+					/>
 					<IconButton
 						icon={<MdDelete />}
 						onClick={() => handleDeleteBook(book._id)}
@@ -137,16 +144,16 @@ const BookCard = ({ book }) => {
 								placeholder='Publish Year'
 								name='publishYear'
 								type='number'
-								value={updatedBook.price}
+								value={updatedBook.publishYear}
 								onChange={(e) => setUpdatedBook({ ...updatedBook, publishYear: e.target.value })}
 							/>
-							{/* <Input
+							<Input
 								placeholder='Price'
 								name='price'
 								type='number'
 								value={updatedBook.price}
 								onChange={(e) => setUpdatedBook({ ...updatedBook, price: e.target.value })}
-							/> */}
+							/>
 							<Input
 								placeholder='Image URL'
 								name='image'

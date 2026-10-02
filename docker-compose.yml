@@ -4,17 +4,26 @@ services:
       context: ./frontend
     ports:
       - "5173:5173"
+    environment:
+      - API_PROXY_TARGET=http://backend:3333
+    depends_on:
+      - backend
+    networks:
+      - mern-stack
 
   backend:
     build:
       context: ./backend
     ports:
       - "3333:3333"
-
+    environment:
+      - PORT=3333
+      - DATABASE_URI=mongodb://mongo:27017/bookstore
+      - CORS_ORIGIN=http://localhost:5173
     depends_on:
       - mongo
-
-
+    networks:
+      - mern-stack
 
   mongo:
     image: mongo:latest
@@ -33,5 +42,3 @@ networks:
 volumes:
   mongo-data:
     driver: local
-
-

@@ -27,96 +27,54 @@ Users: Stores user profiles, authentication credentials, and order history.
 Books: Manages book details such as title, author, publishYear, price
 Orders: Tracks orders placed by users, including items, payment status, and delivery updates.
 
-# # Dockerization
-Docker Setup
-The entire project is containerized using Docker to ensure consistency and portability across environments.
+# # Getting Started
 
-# # Frontend (React.js):
-Dockerfile:
+## Run everything with Docker Compose
 ```
-FROM node:20-alpine
-
-WORKDIR /app
-
-COPY package.json ./
-
-RUN npm install
-
-COPY . .
-
-RUN npm run build
-
-EXPOSE 5173
-
-CMD ["npm", "run", "dev"]
+docker compose up --build
 ```
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3333/books
+- MongoDB: localhost:27017 (data kept in the `mongo-data` volume)
 
-# # Build & Run Commands:
+The frontend dev server proxies `/books` to the backend, so the browser only talks to port 5173.
+
+## Run locally without Docker
+Requires Node.js 20+ and a running MongoDB.
+
+Backend:
 ```
-docker build -t frontend .
-docker run --name frontend -d -p 5173:5173 frontend
+cd backend
+cp .env.example .env   # then set DATABASE_URI
+npm install
+npm run dev
 ```
 
-
-# # Backend (Node.js + Express.js):
-Dockerfile:
+Frontend (in a second terminal):
 ```
-node:18-alpine
-
-WORKDIR /app
-
-COPY package.json ./
-
-RUN npm install
-
-COPY . .
-
-EXPOSE 3333
-
-CMD ["npm", "run", "dev"]
+cd frontend
+npm install
+npm run dev
 ```
 
-# # Build & Run Commands:
+## Environment variables (backend)
+| Variable | Default | Description |
+| --- | --- | --- |
+| `DATABASE_URI` | (required) | MongoDB connection string |
+| `PORT` | `3333` | Port the API listens on |
+| `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated origins allowed to call the API |
 
-```
-docker build -t backend .
-docker run --name backend -d -p 3333:3333 backend
-```
-# # Database (MongoDB):
+## API
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/books` | List all books |
+| POST | `/books` | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
+| GET | `/books/:id` | Get one book |
+| PUT | `/books/:id` | Update the fields sent in the body |
+| DELETE | `/books/:id` | Delete a book |
 
-Run MongoDB using Docker:
-```
-docker run --name mongodb --network=mern-stack -d -p 27017:27017 -v ~/opt/data:/data/db mongo:latest
-Docker Compose
-To streamline the process, a docker-compose.yml file combines all services:
-```
+Responses look like `{ "success": true, "message": "...", "data": ... }`.
 
-
-```
-version: '3.8'
-services:
-  frontend:
-    build:
-      context: ./frontend
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - "3333:3333"
-    depends_on:
-      - database
-
-  database:
-    image: mongodb
-    container_name: bookstore-mongodb
-    ports:
-      - "27017:27017"
-```
 
 # # Collaboration Opportunities
 This project is open for collaboration! Contributions are welcome in the following areas:
