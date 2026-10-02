@@ -1,15 +1,10 @@
-import { Box, Button, Container, Heading, Input, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
+import { Box, Button, Container, Heading, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import { useBookStore } from "../store/book";
+import BookFormFields, { EMPTY_BOOK } from "../components/BookFormFields";
 
 const CreatePage = () => {
-	const [newBook, setNewBook] = useState({
-		title: "",
-        author: "",
-        publishYear: "",
-		price: "",
-		image: "",
-	});
+	const [newBook, setNewBook] = useState(EMPTY_BOOK);
 	const toast = useToast();
 
 	const { createBook } = useBookStore();
@@ -33,11 +28,11 @@ const CreatePage = () => {
                 isClosable: true,
               });
 		}
-		setNewBook({ title: "", author: "", publishYear: "", price: "", image: "" });
+		setNewBook(EMPTY_BOOK);
 	};
 
 	return (
-		<Container maxW={"container.sm"}>
+		<Container maxW={"container.sm"} py={12}>
 			<VStack spacing={8}>
 				<Heading as={"h1"} size={"2xl"} textAlign={"center"} mb={8}>
 					Create New Book
@@ -45,39 +40,7 @@ const CreatePage = () => {
 
 				<Box w={"full"} bg={useColorModeValue("white", "gray.800")} p={6} rounded={"lg"} shadow={"md"}>
 					<VStack spacing={4}>
-						<Input
-							placeholder='Book Title'
-							name='title'
-							value={newBook.title}
-							onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-						/>
-                        <Input
-							placeholder='Author'
-							name='author'
-							value={newBook.author}
-							onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
-						/>
-                        <Input
-							placeholder='Publish Year'
-							name='publishYear'
-							type='number'
-							value={newBook.publishYear}
-							onChange={(e) => setNewBook({ ...newBook, publishYear: e.target.value })}
-						/>
-						<Input
-							placeholder='Price'
-							name='price'
-							type='number'
-							value={newBook.price}
-							onChange={(e) => setNewBook({ ...newBook, price: e.target.value })}
-						/>
-						<Input
-							placeholder='Image URL'
-							name='image'
-							type='url'
-							value={newBook.image}
-							onChange={(e) => setNewBook({ ...newBook, image: e.target.value })}
-						/>
+						<BookFormFields book={newBook} onChange={setNewBook} />
 
 						<Button colorScheme='blue' onClick={handleAddBook} w='full'>
 							Add Book

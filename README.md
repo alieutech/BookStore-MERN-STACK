@@ -85,9 +85,10 @@ To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Doc
 | POST | `/auth/register` | Public | Create an account (`name`, `email`, `password` of 8+ characters) |
 | POST | `/auth/login` | Public | Log in with `email` and `password` |
 | GET | `/auth/me` | Logged in | Get the current user |
-| GET | `/books` | Public | List all books |
+| GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `title`) |
+| GET | `/books/categories` | Public | Categories that have at least one book |
 | GET | `/books/:id` | Public | Get one book |
-| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
+| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`, optional `category` and `description`) |
 | PUT | `/books/:id` | Admin | Update the fields sent in the body |
 | DELETE | `/books/:id` | Admin | Delete a book |
 | POST | `/orders` | Logged in | Place an order: `items: [{ book, quantity }]`, `shippingAddress: { fullName, phone, address, city, country }` |

@@ -10,16 +10,30 @@ export const useBookStore = create((set) => ({
   // Set books
   setBooks: (books) => set({ books }),
 
-  // Fetch all books
-  fetchBooks: async () => {
+  categories: [],
+
+  // Fetch books. Optional filters: { q, category, minPrice, maxPrice, sort }
+  fetchBooks: async (filters = {}) => {
+    const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
+    const query = params.toString();
     try {
-      const data = await request("/books");
+      const data = await request(query ? `/books?${query}` : "/books");
       set({ books: data.data || [] });
       return true;
     } catch (err) {
       console.error("Error fetching books:", err);
       set({ books: [] });
       return false;
+    }
+  },
+
+  // Categories that have at least one book
+  fetchCategories: async () => {
+    try {
+      const { data } = await request("/books/categories");
+      set({ categories: data });
+    } catch (err) {
+      console.error("Error fetching categories:", err);
     }
   },
 

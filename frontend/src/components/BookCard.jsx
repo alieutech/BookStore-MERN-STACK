@@ -1,13 +1,13 @@
 import { MdDelete, MdEdit } from 'react-icons/md';
 
 import {
+	Badge,
 	Box,
 	Button,
 	Heading,
 	HStack,
 	IconButton,
 	Image,
-	Input,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -22,6 +22,7 @@ import {
 	VStack,
 } from "@chakra-ui/react";
 import { useBookStore } from "../store/book";
+import BookFormFields from "./BookFormFields";
 import { useIsAdmin } from "../store/auth";
 import { useCartStore } from "../store/cart";
 import { formatPrice } from "../utils/format";
@@ -106,6 +107,11 @@ const BookCard = ({ book }) => {
 			<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
 
 			<Box p={4}>
+				{book.category && (
+					<Badge colorScheme='purple' mb={2}>
+						{book.category}
+					</Badge>
+				)}
 				<Heading as='h3' size='md' mb={2}>
 					{book.title}
 				</Heading>
@@ -154,38 +160,7 @@ const BookCard = ({ book }) => {
 					<ModalCloseButton />
 					<ModalBody>
 						<VStack spacing={4}>
-							<Input
-								placeholder='Book Title'
-								name='title'
-								value={updatedBook.title}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, title: e.target.value })}
-							/>
-							<Input
-								placeholder='Author'
-								name='author'
-								value={updatedBook.author}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, author: e.target.value })}
-							/>
-							<Input
-								placeholder='Publish Year'
-								name='publishYear'
-								type='number'
-								value={updatedBook.publishYear}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, publishYear: e.target.value })}
-							/>
-							<Input
-								placeholder='Price'
-								name='price'
-								type='number'
-								value={updatedBook.price}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, price: e.target.value })}
-							/>
-							<Input
-								placeholder='Image URL'
-								name='image'
-								value={updatedBook.image}
-								onChange={(e) => setUpdatedBook({ ...updatedBook, image: e.target.value })}
-							/>
+							<BookFormFields book={updatedBook} onChange={setUpdatedBook} />
 						</VStack>
 					</ModalBody>
 

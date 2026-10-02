@@ -21,8 +21,22 @@ const books = new mongoose.Schema({
     image: {
         type: String,
         required: true
+    },
+    category: {
+        type: String,
+        trim: true,
+        default: 'General'
+    },
+    description: {
+        type: String,
+        trim: true,
+        default: ''
     }
 }, { timestamps: true })
 
+
+// Speeds up category filters and the default "newest first" sort
+books.index({ category: 1 });
+books.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Books', books);

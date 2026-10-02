@@ -8,6 +8,8 @@ router.route('/')
   .get(Bookscontroller.getBooks)
   .post(requireAuth, requireAdmin, Bookscontroller.createNewBook);
 
+router.get('/categories', Bookscontroller.getCategories);
+
 router.route('/:id')
   .get(Bookscontroller.getBook)
   .put(requireAuth, requireAdmin, Bookscontroller.updateBooks)
