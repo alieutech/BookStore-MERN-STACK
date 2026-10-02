@@ -79,18 +79,24 @@ To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Doc
 - Admins see every order under **Orders** and move it through `pending` → `processing` → `shipped` → `delivered` (or `cancelled`).
 - Order totals are calculated on the server from the database prices, and each order keeps a copy of the title and price at the time it was placed.
 
+## Reviews
+Every book has its own page (`/book/:id`) with its description and reviews. Logged-in users can leave one review per book (1–5 stars and an optional comment) and update or delete it later; admins can delete any review. Reviews from customers who ordered the book are marked **Verified purchase**. Average ratings show on every book card and books can be sorted by **Top rated**.
+
 ## API
 | Method | Route | Access | Description |
 | --- | --- | --- | --- |
 | POST | `/auth/register` | Public | Create an account (`name`, `email`, `password` of 8+ characters) |
 | POST | `/auth/login` | Public | Log in with `email` and `password` |
 | GET | `/auth/me` | Logged in | Get the current user |
-| GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `title`) |
+| GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `title`, `rating`) |
 | GET | `/books/categories` | Public | Categories that have at least one book |
 | GET | `/books/:id` | Public | Get one book |
 | POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`, optional `category` and `description`) |
 | PUT | `/books/:id` | Admin | Update the fields sent in the body |
 | DELETE | `/books/:id` | Admin | Delete a book |
+| GET | `/books/:id/reviews` | Public | Reviews of a book, newest first |
+| POST | `/books/:id/reviews` | Logged in | Add or update your review: `rating` (1–5), optional `comment` (max 1000 characters) |
+| DELETE | `/books/:id/reviews/:reviewId` | Author or admin | Delete a review |
 | POST | `/orders` | Logged in | Place an order: `items: [{ book, quantity }]`, `shippingAddress: { fullName, phone, address, city, country }` |
 | GET | `/orders/mine` | Logged in | Your orders, newest first |
 | GET | `/orders/:id` | Owner or admin | Get one order |

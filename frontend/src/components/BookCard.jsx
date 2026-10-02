@@ -23,6 +23,8 @@ import {
 } from "@chakra-ui/react";
 import { useBookStore } from "../store/book";
 import BookFormFields from "./BookFormFields";
+import { StarRating } from "./StarRating";
+import { Link as RouterLink } from "react-router-dom";
 import { useIsAdmin } from "../store/auth";
 import { useCartStore } from "../store/cart";
 import { formatPrice } from "../utils/format";
@@ -104,7 +106,9 @@ const BookCard = ({ book }) => {
 			_hover={{ transform: "translateY(-5px)", shadow: "xl" }}
 			bg={bg}
 		>
-			<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
+			<RouterLink to={`/book/${book._id}`}>
+				<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
+			</RouterLink>
 
 			<Box p={4}>
 				{book.category && (
@@ -113,8 +117,11 @@ const BookCard = ({ book }) => {
 					</Badge>
 				)}
 				<Heading as='h3' size='md' mb={2}>
-					{book.title}
+					<RouterLink to={`/book/${book._id}`}>{book.title}</RouterLink>
 				</Heading>
+				<Box mb={2}>
+					<StarRating value={book.averageRating || 0} count={book.numReviews || 0} size='14px' />
+				</Box>
 				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
 					{book.author}
 				</Text>

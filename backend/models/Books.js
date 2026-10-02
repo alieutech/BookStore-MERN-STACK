@@ -31,6 +31,15 @@ const books = new mongoose.Schema({
         type: String,
         trim: true,
         default: ''
+    },
+    // Kept up to date from the reviews (see controllers/reviews.js)
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+    numReviews: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Books = require('../models/Books');
+const Review = require('../models/Review');
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -9,6 +10,7 @@ const SORT_OPTIONS = {
     price_asc: { price: 1, createdAt: -1 },
     price_desc: { price: -1, createdAt: -1 },
     title: { title: 1 },
+    rating: { averageRating: -1, numReviews: -1 },
 };
 const BOOK_FIELDS = ['title', 'author', 'publishYear', 'price', 'image', 'category', 'description'];
 
@@ -16,7 +18,7 @@ const BOOK_FIELDS = ['title', 'author', 'publishYear', 'price', 'image', 'catego
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Fetch Books, optionally filtered and sorted:
-// ?q=text (title or author) &category=Name &minPrice=5 &maxPrice=20 &sort=newest|oldest|price_asc|price_desc|title
+// ?q=text (title or author) &category=Name &minPrice=5 &maxPrice=20 &sort=newest|oldest|price_asc|price_desc|title|rating
 const getBooks = async (req, res, next) => {
     const { q, category, minPrice, maxPrice, sort = 'newest' } = req.query;
     const filter = {};
@@ -122,6 +124,7 @@ const deleteBook = async (req, res, next) => {
         if (!book) {
             return res.status(404).json({ success: false, message: `No book matches ID ${id}.` });
         }
+        await Review.deleteMany({ book: id });
         res.status(200).json({ success: true, message: `Book with ID ${id} deleted successfully.`, data: book });
     } catch (err) {
         next(err);

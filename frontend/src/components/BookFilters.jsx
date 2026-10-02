@@ -5,6 +5,7 @@ import { useBookStore } from "../store/book";
 
 export const SORT_LABELS = {
 	newest: "Newest first",
+	rating: "Top rated",
 	price_asc: "Price: low to high",
 	price_desc: "Price: high to low",
 	title: "Title A–Z",
