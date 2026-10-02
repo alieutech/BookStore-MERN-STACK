@@ -79,6 +79,13 @@ To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Doc
 - Admins see every order under **Orders** and move it through `pending` → `processing` → `shipped` → `delivered` (or `cancelled`).
 - Order totals are calculated on the server from the database prices, and each order keeps a copy of the title and price at the time it was placed.
 
+## Inventory and dashboard
+Each book has a `stock` count. Placing an order takes the copies out of stock (an order that asks for more than is left is refused, and two customers can never buy the same last copy); cancelling an order puts them back. Books show **In stock**, **Only N left** or **Out of stock**, and the cart won't let you add more than are available.
+
+Admins get a **Dashboard** (`/admin`) with revenue, order and customer totals, a 30-day revenue chart (with a table view), orders by status, best sellers and books that are running low.
+
+> Books that existed before stock tracking start with a stock of 0 — edit them to set their stock.
+
 ## Reviews
 Every book has its own page (`/book/:id`) with its description and reviews. Logged-in users can leave one review per book (1–5 stars and an optional comment) and update or delete it later; admins can delete any review. Reviews from customers who ordered the book are marked **Verified purchase**. Average ratings show on every book card and books can be sorted by **Top rated**.
 
@@ -91,7 +98,7 @@ Every book has its own page (`/book/:id`) with its description and reviews. Logg
 | GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `title`, `rating`) |
 | GET | `/books/categories` | Public | Categories that have at least one book |
 | GET | `/books/:id` | Public | Get one book |
-| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`, optional `category` and `description`) |
+| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`, optional `category`, `description` and `stock`) |
 | PUT | `/books/:id` | Admin | Update the fields sent in the body |
 | DELETE | `/books/:id` | Admin | Delete a book |
 | GET | `/books/:id/reviews` | Public | Reviews of a book, newest first |
@@ -101,6 +108,7 @@ Every book has its own page (`/book/:id`) with its description and reviews. Logg
 | GET | `/orders/mine` | Logged in | Your orders, newest first |
 | GET | `/orders/:id` | Owner or admin | Get one order |
 | PUT | `/orders/:id/cancel` | Owner | Cancel a `pending` order |
+| GET | `/reports/sales` | Admin | Dashboard numbers: totals, orders by status, revenue for the last 30 days, best sellers, low stock |
 | GET | `/orders` | Admin | All orders, with the customer's name and email |
 | PUT | `/orders/:id/status` | Admin | Set `status` to `pending`, `processing`, `shipped`, `delivered` or `cancelled` |
 

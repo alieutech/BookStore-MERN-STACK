@@ -25,6 +25,7 @@ import { formatPrice } from "../utils/format";
 
 const CartPage = () => {
 	const { lines, total, isLoading } = useCartLines();
+	const hasStockProblem = lines.some(({ quantity, book }) => quantity > (book.stock ?? 0));
 	const { setQuantity, removeItem } = useCartStore();
 	const bg = useColorModeValue("white", "gray.800");
 
@@ -61,12 +62,17 @@ const CartPage = () => {
 								<Text fontSize='sm' color='gray.500'>
 									{book.author} · {formatPrice(book.price)} each
 								</Text>
+								{quantity > (book.stock ?? 0) && (
+									<Text fontSize='sm' color='red.500'>
+										{book.stock ? `Only ${book.stock} left. Please lower the quantity.` : "Out of stock. Please remove it."}
+									</Text>
+								)}
 							</Box>
 							<NumberInput
 								size='sm'
 								maxW='20'
 								min={1}
-								max={MAX_QUANTITY}
+								max={Math.max(1, Math.min(book.stock ?? 0, MAX_QUANTITY))}
 								value={quantity}
 								onChange={(_, value) => !Number.isNaN(value) && setQuantity(bookId, value)}
 							>
@@ -87,7 +93,7 @@ const CartPage = () => {
 						<Text fontSize='2xl' fontWeight='bold'>
 							Total: {formatPrice(total)}
 						</Text>
-						<Button as={RouterLink} to='/checkout' colorScheme='blue' size='lg'>
+						<Button as={RouterLink} to='/checkout' colorScheme='blue' size='lg' isDisabled={hasStockProblem} onClick={(e) => hasStockProblem && e.preventDefault()}>
 							Checkout
 						</Button>
 					</Flex>

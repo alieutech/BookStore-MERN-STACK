@@ -26,7 +26,8 @@ import BookFormFields from "./BookFormFields";
 import { StarRating } from "./StarRating";
 import { Link as RouterLink } from "react-router-dom";
 import { useIsAdmin } from "../store/auth";
-import { useCartStore } from "../store/cart";
+import { useAddToCart } from "../hooks/useAddToCart";
+import StockBadge from "./StockBadge";
 import { formatPrice } from "../utils/format";
 import { FiShoppingCart } from "react-icons/fi";
 import { useState } from "react";
@@ -39,20 +40,9 @@ const BookCard = ({ book }) => {
 
 	const { deleteBook, updateBook } = useBookStore();
 	const isAdmin = useIsAdmin();
-	const addToCart = useCartStore((state) => state.addItem);
+	const addToCart = useAddToCart();
 	const toast = useToast();
 	const { isOpen, onOpen, onClose } = useDisclosure();
-
-	const handleAddToCart = () => {
-		addToCart(book._id);
-		toast({
-			title: "Added to cart",
-			description: `"${book.title}" is in your cart.`,
-			status: "success",
-			duration: 2000,
-			isClosable: true,
-		});
-	};
 
 	const handleDeleteBook = async (id) => {
 		const { success, message } = await deleteBook(id);
@@ -111,11 +101,10 @@ const BookCard = ({ book }) => {
 			</RouterLink>
 
 			<Box p={4}>
-				{book.category && (
-					<Badge colorScheme='purple' mb={2}>
-						{book.category}
-					</Badge>
-				)}
+				<HStack mb={2} spacing={2}>
+					{book.category && <Badge colorScheme='purple'>{book.category}</Badge>}
+					<StockBadge stock={book.stock} />
+				</HStack>
 				<Heading as='h3' size='md' mb={2}>
 					<RouterLink to={`/book/${book._id}`}>{book.title}</RouterLink>
 				</Heading>
@@ -134,8 +123,8 @@ const BookCard = ({ book }) => {
 				</Text>
 
 				<HStack spacing={2}>
-					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={handleAddToCart} flex='1'>
-						Add to cart
+					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={() => addToCart(book)} flex='1' isDisabled={!book.stock}>
+						{book.stock ? "Add to cart" : "Sold out"}
 					</Button>
 				{isAdmin && (
 				<>

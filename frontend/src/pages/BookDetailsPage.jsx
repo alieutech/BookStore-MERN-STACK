@@ -22,7 +22,8 @@ import { Link as RouterLink, useLocation, useParams } from "react-router-dom";
 import { request } from "../api/request";
 import { StarInput, StarRating } from "../components/StarRating";
 import { useAuthStore, useIsAdmin } from "../store/auth";
-import { useCartStore } from "../store/cart";
+import { useAddToCart } from "../hooks/useAddToCart";
+import StockBadge from "../components/StockBadge";
 import { formatDate, formatPrice } from "../utils/format";
 
 const BookDetailsPage = () => {
@@ -30,7 +31,7 @@ const BookDetailsPage = () => {
 	const location = useLocation();
 	const user = useAuthStore((state) => state.user);
 	const isAdmin = useIsAdmin();
-	const addToCart = useCartStore((state) => state.addItem);
+	const addToCart = useAddToCart();
 	const toast = useToast();
 	const bg = useColorModeValue("white", "gray.800");
 	const mutedColor = useColorModeValue("gray.600", "gray.400");
@@ -90,11 +91,6 @@ const BookDetailsPage = () => {
 		}
 	};
 
-	const handleAddToCart = () => {
-		addToCart(book._id);
-		notify(true, `"${book.title}" is in your cart.`);
-	};
-
 	if (error) {
 		return (
 			<Container py={12}>
@@ -117,7 +113,10 @@ const BookDetailsPage = () => {
 			<Stack direction={{ base: "column", md: "row" }} spacing={10} align='start'>
 				<Image src={book.image} alt={book.title} w={{ base: "full", md: "sm" }} maxH='md' objectFit='cover' rounded='lg' shadow='lg' />
 				<VStack align='start' spacing={4} flex='1'>
-					{book.category && <Badge colorScheme='purple'>{book.category}</Badge>}
+					<HStack spacing={2}>
+						{book.category && <Badge colorScheme='purple'>{book.category}</Badge>}
+						<StockBadge stock={book.stock} />
+					</HStack>
 					<Heading as='h1' size='xl'>
 						{book.title}
 					</Heading>
@@ -129,8 +128,8 @@ const BookDetailsPage = () => {
 						{formatPrice(book.price)}
 					</Text>
 					{book.description && <Text whiteSpace='pre-line'>{book.description}</Text>}
-					<Button leftIcon={<FiShoppingCart />} colorScheme='green' size='lg' onClick={handleAddToCart}>
-						Add to cart
+					<Button leftIcon={<FiShoppingCart />} colorScheme='green' size='lg' onClick={() => addToCart(book)} isDisabled={!book.stock}>
+						{book.stock ? "Add to cart" : "Sold out"}
 					</Button>
 				</VStack>
 			</Stack>

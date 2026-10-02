@@ -11,6 +11,10 @@ const ADDRESS_FIELDS = ['fullName', 'phone', 'address', 'city', 'country'];
 // Round money to 2 decimal places
 const roundMoney = (amount) => Math.round(amount * 100) / 100;
 
+// Put an order's items back into stock (after a cancellation or a failed order)
+const restock = (items) =>
+    Promise.all(items.map(({ book, quantity }) => Books.updateOne({ _id: book }, { $inc: { stock: quantity } })));
+
 // Place an order for the logged-in user. Prices come from the database, not the client.
 const createOrder = async (req, res, next) => {
     const { items, shippingAddress } = req.body;
@@ -42,6 +46,23 @@ const createOrder = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Some books in your cart are no longer available. Please refresh your cart.' });
         }
 
+        // Reserve stock one book at a time. Each update only succeeds if enough copies are left,
+        // so two customers can never buy the same last copy. Undo the reservations if any fails.
+        const reserved = [];
+        for (const book of books) {
+            const quantity = quantities.get(String(book._id));
+            const updated = await Books.updateOne({ _id: book._id, stock: { $gte: quantity } }, { $inc: { stock: -quantity } });
+            if (updated.modifiedCount === 0) {
+                await restock(reserved);
+                const left = (await Books.findById(book._id))?.stock ?? 0;
+                return res.status(409).json({
+                    success: false,
+                    message: left > 0 ? `Only ${left} ${left === 1 ? 'copy' : 'copies'} of "${book.title}" left.` : `"${book.title}" is out of stock.`,
+                });
+            }
+            reserved.push({ book: book._id, quantity });
+        }
+
         const orderItems = books.map((book) => ({
             book: book._id,
             title: book.title,
@@ -51,12 +72,18 @@ const createOrder = async (req, res, next) => {
         }));
         const totalPrice = roundMoney(orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
 
-        const order = await Order.create({
-            user: req.user._id,
-            items: orderItems,
-            shippingAddress: Object.fromEntries(ADDRESS_FIELDS.map((field) => [field, shippingAddress[field].trim()])),
-            totalPrice,
-        });
+        let order;
+        try {
+            order = await Order.create({
+                user: req.user._id,
+                items: orderItems,
+                shippingAddress: Object.fromEntries(ADDRESS_FIELDS.map((field) => [field, shippingAddress[field].trim()])),
+                totalPrice,
+            });
+        } catch (err) {
+            await restock(reserved);
+            throw err;
+        }
         res.status(201).json({ success: true, message: 'Order placed successfully.', data: order });
     } catch (err) {
         next(err);
@@ -108,15 +135,20 @@ const cancelOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: `Invalid order ID ${id}.` });
     }
     try {
-        const order = await Order.findOne({ _id: id, user: req.user._id });
+        // Only flip pending -> cancelled once, even if two requests arrive together
+        const order = await Order.findOneAndUpdate(
+            { _id: id, user: req.user._id, status: 'pending' },
+            { status: 'cancelled' },
+            { new: true }
+        );
         if (!order) {
-            return res.status(404).json({ success: false, message: `No order matches ID ${id}.` });
+            const existing = await Order.findOne({ _id: id, user: req.user._id });
+            if (!existing) {
+                return res.status(404).json({ success: false, message: `No order matches ID ${id}.` });
+            }
+            return res.status(409).json({ success: false, message: `This order is already ${existing.status} and can no longer be cancelled.` });
         }
-        if (order.status !== 'pending') {
-            return res.status(409).json({ success: false, message: `This order is already ${order.status} and can no longer be cancelled.` });
-        }
-        order.status = 'cancelled';
-        await order.save();
+        await restock(order.items);
         res.status(200).json({ success: true, message: 'Order cancelled.', data: order });
     } catch (err) {
         next(err);
@@ -134,9 +166,20 @@ const updateOrderStatus = async (req, res, next) => {
         return res.status(400).json({ success: false, message: `Status must be one of: ${ORDER_STATUSES.join(', ')}.` });
     }
     try {
-        const order = await Order.findByIdAndUpdate(id, { status }, { new: true, runValidators: true }).populate('user', 'name email');
+        // A cancelled order has already returned its stock, so it stays cancelled
+        const order = await Order.findOneAndUpdate(
+            { _id: id, status: { $ne: 'cancelled' } },
+            { status },
+            { new: true, runValidators: true }
+        ).populate('user', 'name email');
         if (!order) {
+            if (await Order.exists({ _id: id })) {
+                return res.status(409).json({ success: false, message: 'Cancelled orders cannot be changed.' });
+            }
             return res.status(404).json({ success: false, message: `No order matches ID ${id}.` });
+        }
+        if (status === 'cancelled') {
+            await restock(order.items);
         }
         res.status(200).json({ success: true, message: `Order marked as ${status}.`, data: order });
     } catch (err) {

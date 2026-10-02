@@ -11,6 +11,7 @@ import CartPage from "./pages/CartPage"
 import BookDetailsPage from "./pages/BookDetailsPage"
 import CheckoutPage from "./pages/CheckoutPage"
 import OrdersPage from "./pages/OrdersPage"
+import DashboardPage from "./pages/DashboardPage"
 import { useAuthStore } from "./store/auth"
 
 
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="/cart" element={< CartPage />}/>
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}/>
           <Route path="/my-orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>}/>
+          <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardPage /></ProtectedRoute>}/>
           <Route path="/admin/orders" element={<ProtectedRoute adminOnly><OrdersPage isAdminView /></ProtectedRoute>}/>
           <Route path="/login" element={< LoginPage />}/>
           <Route path="/register" element={< RegisterPage />}/>

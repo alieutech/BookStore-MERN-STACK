@@ -35,10 +35,12 @@ const NavBar = () => {
   return (
     <Container maxW={"1140px"} px={4} bg={bgColor}>
       <Flex
-        h={16}
+        minH={16}
+        py={2}
+        gap={2}
         alignItems={"center"}
         justifyContent={"space-around"}
-        flexDir={{ base: "column", sm: "row" }}
+        flexDir={{ base: "column", md: "row" }}
       >
         <HStack spacing={2}>         
           <Text
@@ -54,7 +56,7 @@ const NavBar = () => {
             </Link>
           </Text>
         </HStack>
-        <HStack spacing={2} alignItems={"center"}>
+        <HStack spacing={2} alignItems={"center"} flexWrap={"wrap"} justifyContent={"center"} rowGap={2}>
           {isAdmin && (
             <Link as={RouterLink} to={"/create"}>
               <Button aria-label="Add book">
@@ -72,6 +74,11 @@ const NavBar = () => {
           </Button>
           {user ? (
             <>
+              {isAdmin && (
+                <Button as={RouterLink} to={"/admin"} variant="ghost">
+                  Dashboard
+                </Button>
+              )}
               <Button as={RouterLink} to={isAdmin ? "/admin/orders" : "/my-orders"} variant="ghost">
                 {isAdmin ? "Orders" : "My orders"}
               </Button>

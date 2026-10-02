@@ -12,7 +12,7 @@ const SORT_OPTIONS = {
     title: { title: 1 },
     rating: { averageRating: -1, numReviews: -1 },
 };
-const BOOK_FIELDS = ['title', 'author', 'publishYear', 'price', 'image', 'category', 'description'];
+const BOOK_FIELDS = ['title', 'author', 'publishYear', 'price', 'image', 'category', 'description', 'stock'];
 
 // Escape user text so it is matched literally inside a regular expression
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -62,12 +62,12 @@ const getCategories = async (req, res, next) => {
 
 // Create new Book
 const createNewBook = async (req, res, next) => {
-    const { title, author, publishYear, price, image, category, description } = req.body;
+    const { title, author, publishYear, price, image, category, description, stock } = req.body;
     if (!title || !author || !publishYear || !price || !image) {
         return res.status(400).json({ success: false, message: 'title, author, publishYear, price and image are required.' });
     }
     try {
-        const book = await Books.create({ title, author, publishYear, price, image, category: category || undefined, description });
+        const book = await Books.create({ title, author, publishYear, price, image, category: category || undefined, description, stock });
         res.status(201).json({ success: true, message: 'Book created successfully.', data: book });
     } catch (err) {
         next(err);

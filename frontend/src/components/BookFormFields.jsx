@@ -2,7 +2,7 @@ import { Input, Textarea } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useBookStore } from "../store/book";
 
-export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", image: "", category: "", description: "" };
+export const EMPTY_BOOK = { title: "", author: "", publishYear: "", price: "", image: "", category: "", description: "", stock: "" };
 
 // The inputs shared by the "create book" page and the "edit book" dialog
 const BookFormFields = ({ book, onChange }) => {
@@ -19,6 +19,7 @@ const BookFormFields = ({ book, onChange }) => {
 			<Input placeholder='Author' name='author' value={book.author} onChange={set("author")} />
 			<Input placeholder='Publish Year' name='publishYear' type='number' value={book.publishYear} onChange={set("publishYear")} />
 			<Input placeholder='Price' name='price' type='number' value={book.price} onChange={set("price")} />
+			<Input placeholder='Copies in stock' name='stock' type='number' min={0} value={book.stock ?? ""} onChange={set("stock")} />
 			<Input placeholder='Category (e.g. Programming)' name='category' list='book-categories' value={book.category || ""} onChange={set("category")} />
 			<datalist id='book-categories'>
 				{categories.map((category) => (
