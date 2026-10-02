@@ -63,15 +63,28 @@ npm run dev
 | `DATABASE_URI` | (required) | MongoDB connection string |
 | `PORT` | `3333` | Port the API listens on |
 | `CORS_ORIGIN` | `http://localhost:5173` | Comma-separated origins allowed to call the API |
+| `JWT_SECRET` | (required) | Secret used to sign login tokens — use a long random string |
+| `JWT_EXPIRES_IN` | `7d` | How long a login lasts |
+| `ADMIN_EMAILS` | (empty) | Comma-separated emails that get the admin role when they register |
+
+## Users and admins
+Anyone can browse books. Only admins can add, edit or delete them.
+
+To become an admin, put your email in `ADMIN_EMAILS` **before** you sign up (Docker Compose uses `admin@example.com` unless you set `ADMIN_EMAILS`). Everyone else gets the normal `user` role.
 
 ## API
-| Method | Route | Description |
-| --- | --- | --- |
-| GET | `/books` | List all books |
-| POST | `/books` | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
-| GET | `/books/:id` | Get one book |
-| PUT | `/books/:id` | Update the fields sent in the body |
-| DELETE | `/books/:id` | Delete a book |
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/auth/register` | Public | Create an account (`name`, `email`, `password` of 8+ characters) |
+| POST | `/auth/login` | Public | Log in with `email` and `password` |
+| GET | `/auth/me` | Logged in | Get the current user |
+| GET | `/books` | Public | List all books |
+| GET | `/books/:id` | Public | Get one book |
+| POST | `/books` | Admin | Create a book (`title`, `author`, `publishYear`, `price`, `image`) |
+| PUT | `/books/:id` | Admin | Update the fields sent in the body |
+| DELETE | `/books/:id` | Admin | Delete a book |
+
+Register and login return `data: { user, token }`. Send the token on protected routes as `Authorization: Bearer <token>`.
 
 Responses look like `{ "success": true, "message": "...", "data": ... }`.
 

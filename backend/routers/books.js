@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Bookscontroller = require('../controllers/books');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
-// Routes for all books
+// Anyone can browse books; only admins can change them
 router.route('/')
   .get(Bookscontroller.getBooks)
-  .post(Bookscontroller.createNewBook);
-
+  .post(requireAuth, requireAdmin, Bookscontroller.createNewBook);
 
 router.route('/:id')
   .get(Bookscontroller.getBook)
-  .put(Bookscontroller.updateBooks)
-  .delete(Bookscontroller.deleteBook); 
+  .put(requireAuth, requireAdmin, Bookscontroller.updateBooks)
+  .delete(requireAuth, requireAdmin, Bookscontroller.deleteBook);
 
-  
 module.exports = router;
