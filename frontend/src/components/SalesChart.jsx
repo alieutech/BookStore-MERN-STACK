@@ -23,7 +23,7 @@ const SalesChart = ({ days }) => {
 	const [hovered, setHovered] = useState(null);
 	const [showTable, setShowTable] = useState(false);
 	// SVG attributes need real color values, not Chakra token names
-	const [barLight, barDark, gridLight, gridDark, textLight, textDark] = useToken("colors", ["blue.500", "blue.400", "gray.200", "gray.600", "gray.600", "gray.400"]);
+	const [barLight, barDark, gridLight, gridDark, textLight, textDark] = useToken("colors", ["brand.500", "brand.400", "gray.200", "gray.600", "gray.600", "gray.400"]);
 	const barColor = useColorModeValue(barLight, barDark);
 	const gridColor = useColorModeValue(gridLight, gridDark);
 	const mutedText = useColorModeValue(textLight, textDark);

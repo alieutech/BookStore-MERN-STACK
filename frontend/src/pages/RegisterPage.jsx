@@ -6,13 +6,14 @@ const RegisterPage = () => {
 
 	return (
 		<AuthForm
-			title='Sign Up'
+			title='Create your account'
+			subtitle='It only takes a minute.'
 			submitLabel='Create Account'
 			onSubmit={register}
 			fields={[
-				{ name: "name", placeholder: "Name", autoComplete: "name" },
-				{ name: "email", type: "email", placeholder: "Email", autoComplete: "email" },
-				{ name: "password", type: "password", placeholder: "Password (8 to 72 characters)", autoComplete: "new-password" },
+				{ name: "name", label: "Name", autoComplete: "name" },
+				{ name: "email", label: "Email", type: "email", autoComplete: "email" },
+				{ name: "password", label: "Password", type: "password", autoComplete: "new-password", help: "8 to 72 characters." },
 			]}
 			footer={{ text: "Already have an account?", linkLabel: "Log in", to: "/login" }}
 		/>

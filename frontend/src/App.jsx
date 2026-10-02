@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Flex } from "@chakra-ui/react"
 import { useEffect } from "react"
 import { Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
@@ -6,6 +6,9 @@ import CreatePage from "./pages/CreatePage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import NavBar from "./components/NavBar"
+import Footer from "./components/Footer"
+import NotFoundPage from "./pages/NotFoundPage"
+import ScrollToTop from "./components/ScrollToTop"
 import ProtectedRoute from "./components/ProtectedRoute"
 import CartPage from "./pages/CartPage"
 import BookDetailsPage from "./pages/BookDetailsPage"
@@ -25,8 +28,10 @@ const App = () => {
   }, [token, refreshUser])
 
   return (
-    <Box minH={"100vh"}>
+    <Flex direction="column" minH="100vh">
+      <ScrollToTop />
       <NavBar />
+      <Box as="main" flex="1">
       <Routes>
           <Route path="/" element={< HomePage />}/>
           <Route path="/create" element={<ProtectedRoute adminOnly><CreatePage /></ProtectedRoute>}/>
@@ -39,8 +44,11 @@ const App = () => {
           <Route path="/admin/orders" element={<ProtectedRoute adminOnly><OrdersPage isAdminView /></ProtectedRoute>}/>
           <Route path="/login" element={< LoginPage />}/>
           <Route path="/register" element={< RegisterPage />}/>
+          <Route path="*" element={<NotFoundPage />}/>
       </Routes>
-    </Box>
+      </Box>
+      <Footer />
+    </Flex>
   )
 }
 

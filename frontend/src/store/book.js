@@ -14,18 +14,20 @@ export const useBookStore = create((set) => ({
   setBooks: (books) => set({ books }),
 
   categories: [],
+  isLoading: false,
 
   // Fetch books. Optional filters: { q, category, minPrice, maxPrice, sort }
   fetchBooks: async (filters = {}) => {
     const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
     const query = params.toString();
+    set({ isLoading: true });
     try {
       const data = await request(query ? `/books?${query}` : "/books");
-      set({ books: data.data || [] });
+      set({ books: data.data || [], isLoading: false });
       return true;
     } catch (err) {
       console.error("Error fetching books:", err);
-      set({ books: [] });
+      set({ books: [], isLoading: false });
       return false;
     }
   },
@@ -75,7 +77,7 @@ export const useBookStore = create((set) => ({
       set((state) => ({
         books: state.books.map((book) => (book._id === id ? data.data : book)),
       }));
-      return { success: true, message: data.message };
+      return { success: true, message: data.message, book: data.data };
     } catch (err) {
       return { success: false, message: err.message };
     }

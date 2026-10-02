@@ -1,0 +1,20 @@
+import { HStack, Text } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
+
+const LogoMark = () => (
+	<svg width='28' height='28' viewBox='0 0 32 32' aria-hidden='true'>
+		<rect width='32' height='32' rx='8' fill='#4142C4' />
+		<path d='M9 8.5h6.5a3 3 0 0 1 3 3V24a2.5 2.5 0 0 0-2.5-2.5H9z' fill='#fff' />
+		<path d='M23 8.5h-2.5a2 2 0 0 0-2 2V24a2.5 2.5 0 0 1 2.5-2.5H23z' fill='#B8C0FE' />
+	</svg>
+);
+
+const Logo = (props) => (
+	<HStack as={RouterLink} to='/' spacing={2} _hover={{ textDecoration: "none" }} {...props}>
+		<LogoMark />
+		<Text fontFamily='heading' fontWeight='700' fontSize='xl' letterSpacing='-0.02em'>
+			BookStore
+		</Text>
+	</HStack>
+);
+export default Logo;
