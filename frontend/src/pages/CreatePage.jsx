@@ -1,6 +1,6 @@
 import { Box, Button, Container, Heading, Input, useColorModeValue, useToast, VStack } from "@chakra-ui/react";
 import { useState } from "react";
-import { useBookStore } from "../../Store/book";
+import { useBookStore } from "../store/book";
 
 const CreatePage = () => {
 	const [newBook, setNewBook] = useState({
@@ -15,7 +15,6 @@ const CreatePage = () => {
 	const { createBook } = useBookStore();
 
 	const handleAddBook = async () => {
-        console.log(newBook);
 		const { success, message } = await createBook(newBook);
 		if (!success) {
 			toast({
@@ -24,6 +23,7 @@ const CreatePage = () => {
 				status: "error",
 				isClosable: true,
 			});
+			return;
 		} else {
 			toast({
                 title: "Book added successfully!",
@@ -60,6 +60,7 @@ const CreatePage = () => {
                         <Input
 							placeholder='Publish Year'
 							name='publishYear'
+							type='number'
 							value={newBook.publishYear}
 							onChange={(e) => setNewBook({ ...newBook, publishYear: e.target.value })}
 						/>
@@ -73,8 +74,7 @@ const CreatePage = () => {
 						<Input
 							placeholder='Image URL'
 							name='image'
-							type="image/*"
-							// accept="image/*"
+							type='url'
 							value={newBook.image}
 							onChange={(e) => setNewBook({ ...newBook, image: e.target.value })}
 						/>

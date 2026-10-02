@@ -1,7 +1,7 @@
 import { Container, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useBookStore } from "../../Store/book";
+import { useBookStore } from "../store/book";
 import BookCard from "../components/BookCard";
 
 const HomePage = () => {
@@ -10,7 +10,6 @@ const HomePage = () => {
 	useEffect(() => {
 		fetchBooks();
 	}, [fetchBooks]);
-	console.log("books", books);
 
 	return (
 		<Container maxW='container.xl' py={12}>
@@ -32,7 +31,7 @@ const HomePage = () => {
 						lg: 4,
 					}}
 					spacing={10}
-					w={"haft"}
+					w={"full"}
 				>
 					{books.map((book) => (
 						<BookCard key={book._id} book={book} />

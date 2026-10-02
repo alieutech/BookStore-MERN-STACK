@@ -1,4 +1,3 @@
-import React from "react";
 import { 
   Button, 
   Container, 
@@ -9,6 +8,7 @@ import {
   useColorMode, 
   useColorModeValue 
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { AiOutlinePlusSquare } from "react-icons/ai";
 import { IoMoon } from "react-icons/io5";
 import { LuSun } from "react-icons/lu";
@@ -35,13 +35,13 @@ const NavBar = () => {
             bgGradient={"linear(to-r, cyan.400, blue.500)"}
             bgClip={"text"}      
           >       
-            <Link href={"/"}>
+            <Link as={RouterLink} to={"/"}>
               Book Store 📚
             </Link>
           </Text>
         </HStack>
         <HStack spacing={2} alignItems={"center"}>
-          <Link href={"/create"}>
+          <Link as={RouterLink} to={"/create"}>
             <Button>
              <AiOutlinePlusSquare fontSize={20} />
             </Button>
@@ -56,10 +56,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
-
-
-
-
-
-

@@ -4,11 +4,9 @@ FROM node:20-alpine
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Install production dependencies only
 COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm install
+RUN npm ci --omit=dev
 
 # Copy the rest of the application code
 COPY . .
@@ -16,5 +14,5 @@ COPY . .
 # Expose the port the server runs on
 EXPOSE 3333
 
-# Start the application
-CMD ["npm", "start"]
+# Start the API (it only serves the API; the frontend runs in its own container)
+CMD ["node", "server.js"]
