@@ -6,12 +6,13 @@ const LoginPage = () => {
 
 	return (
 		<AuthForm
-			title='Log In'
+			title='Welcome back'
+			subtitle='Log in to check out, track orders and write reviews.'
 			submitLabel='Log In'
 			onSubmit={login}
 			fields={[
-				{ name: "email", type: "email", placeholder: "Email", autoComplete: "email" },
-				{ name: "password", type: "password", placeholder: "Password", autoComplete: "current-password" },
+				{ name: "email", label: "Email", type: "email", autoComplete: "email" },
+				{ name: "password", label: "Password", type: "password", autoComplete: "current-password" },
 			]}
 			footer={{ text: "No account yet?", linkLabel: "Sign up", to: "/register" }}
 		/>

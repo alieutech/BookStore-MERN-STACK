@@ -11,7 +11,7 @@ export const StarRating = ({ value = 0, count, size = "16px" }) => (
 			return <Icon key={star} size={size} />;
 		})}
 		{count !== undefined && (
-			<Text fontSize='sm' color='gray.500' ml={1}>
+			<Text fontSize='sm' color='text.muted' ml={1}>
 				{count > 0 ? `${value.toFixed(1)} (${count})` : "No reviews yet"}
 			</Text>
 		)}

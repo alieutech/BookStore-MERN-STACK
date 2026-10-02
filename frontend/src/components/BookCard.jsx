@@ -1,180 +1,98 @@
-import { MdDelete, MdEdit } from 'react-icons/md';
-
-import {
-	Badge,
-	Box,
-	Button,
-	Heading,
-	HStack,
-	IconButton,
-	Image,
-	Modal,
-	ModalBody,
-	ModalCloseButton,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalOverlay,
-	Text,
-	useColorModeValue,
-	useDisclosure,
-	useToast,
-	VStack,
-} from "@chakra-ui/react";
-import { useBookStore } from "../store/book";
-import BookFormFields from "./BookFormFields";
-import { StarRating } from "./StarRating";
+import { Box, Flex, Heading, IconButton, LinkBox, LinkOverlay, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import { FiEdit2, FiMoreVertical, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { Link as RouterLink } from "react-router-dom";
-import { useIsAdmin } from "../store/auth";
 import { useAddToCart } from "../hooks/useAddToCart";
-import StockBadge from "./StockBadge";
+import { useIsAdmin } from "../store/auth";
+import { useBookStore } from "../store/book";
 import { formatPrice } from "../utils/format";
-import { FiShoppingCart } from "react-icons/fi";
-import { useState } from "react";
+import BookCover from "./BookCover";
+import BookEditModal from "./BookEditModal";
+import ConfirmDialog from "./ConfirmDialog";
+import { StarRating } from "./StarRating";
+import StockBadge, { LOW_STOCK } from "./StockBadge";
 
 const BookCard = ({ book }) => {
-	const [updatedBook, setUpdatedBook] = useState(book);
-
-	const textColor = useColorModeValue("gray.600", "gray.200");
-	const bg = useColorModeValue("white", "gray.800");
-
-	const { deleteBook, updateBook } = useBookStore();
 	const isAdmin = useIsAdmin();
 	const addToCart = useAddToCart();
+	const deleteBook = useBookStore((state) => state.deleteBook);
 	const toast = useToast();
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const edit = useDisclosure();
+	const confirmDelete = useDisclosure();
+	const soldOut = !book.stock;
 
-	const handleDeleteBook = async (id) => {
-		const { success, message } = await deleteBook(id);
-		if (!success) {
-			toast({
-				title: "Error",
-				description: message,
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		} else {
-			toast({
-				title: "Success",
-				description: message,
-				status: "success",
-				duration: 3000,
-				isClosable: true,
-			});
-		}
-	};
-
-	const handleUpdateBook = async (id, updatedBook) => {
-		const { success, message } = await updateBook(id, updatedBook);
-		if (!success) {
-			toast({
-				title: "Error",
-				description: message,
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		} else {
-			onClose();
-			toast({
-				title: "Success",
-				description: message,
-				status: "success",
-				duration: 3000,
-				isClosable: true,
-			});
-		}
+	const handleDelete = async () => {
+		const { success, message } = await deleteBook(book._id);
+		toast({ title: success ? "Book deleted" : "Couldn't delete", description: message, status: success ? "success" : "error" });
 	};
 
 	return (
-		<Box
-			shadow='lg'
-			rounded='lg'
-			overflow='hidden'
-			transition='all 0.3s'
-			_hover={{ transform: "translateY(-5px)", shadow: "xl" }}
-			bg={bg}
-		>
-			<RouterLink to={`/book/${book._id}`}>
-				<Image src={book.image} alt={book.title} h={48} w='full' objectFit='cover' />
-			</RouterLink>
-
-			<Box p={4}>
-				<HStack mb={2} spacing={2}>
-					{book.category && <Badge colorScheme='purple'>{book.category}</Badge>}
-					<StockBadge stock={book.stock} />
-				</HStack>
-				<Heading as='h3' size='md' mb={2}>
-					<RouterLink to={`/book/${book._id}`}>{book.title}</RouterLink>
-				</Heading>
-				<Box mb={2}>
-					<StarRating value={book.averageRating || 0} count={book.numReviews || 0} size='14px' />
-				</Box>
-				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
-					{book.author}
-				</Text>
-				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
-				Publish_Year:  {book.publishYear}
-				</Text>
-
-				<Text fontWeight='bold' fontSize='xl' color={textColor} mb={4}>
-					{formatPrice(book.price)}
-				</Text>
-
-				<HStack spacing={2}>
-					<Button leftIcon={<FiShoppingCart />} colorScheme='green' onClick={() => addToCart(book)} flex='1' isDisabled={!book.stock}>
-						{book.stock ? "Add to cart" : "Sold out"}
-					</Button>
+		<LinkBox as='article' layerStyle='card' overflow='hidden' display='flex' flexDirection='column' transition='all 0.2s' _hover={{ shadow: "lg", transform: "translateY(-2px)" }} role='group'>
+			<Box position='relative' p={3} pb={0}>
+				<BookCover book={book} rounded='md' transition='transform 0.3s' _groupHover={{ transform: "scale(1.02)" }} />
+				{(soldOut || book.stock <= LOW_STOCK) && <StockBadge stock={book.stock} overlay position='absolute' top={5} left={5} shadow='sm' />}
 				{isAdmin && (
-				<>
-					<IconButton
-						aria-label='Edit book'
-						icon={<MdEdit />}
-						onClick={() => {
-							setUpdatedBook(book);
-							onOpen();
-						}}
-						colorScheme='blue'
-					/>
-					<IconButton
-						aria-label='Delete book'
-						icon={<MdDelete />}
-						onClick={() => handleDeleteBook(book._id)}
-						colorScheme='red'
-					/>
-				</>
+					<Box position='absolute' top={5} right={5} zIndex={1}>
+						<Menu placement='bottom-end'>
+							<MenuButton as={IconButton} aria-label='Book actions' icon={<FiMoreVertical />} size='sm' rounded='full' bg='bg.surface' color='text.default' shadow='md' _hover={{ bg: "bg.subtle" }} />
+							<MenuList minW='36'>
+								<MenuItem icon={<FiEdit2 />} onClick={edit.onOpen}>
+									Edit book
+								</MenuItem>
+								<MenuItem icon={<FiTrash2 />} color='red.500' onClick={confirmDelete.onOpen}>
+									Delete book
+								</MenuItem>
+							</MenuList>
+						</Menu>
+					</Box>
 				)}
-				</HStack>
 			</Box>
 
-			<Modal isOpen={isOpen} onClose={onClose}>
-				<ModalOverlay />
+			<Flex direction='column' p={4} pt={3} flex='1' gap={1}>
+				{book.category && (
+					<Text textStyle='eyebrow' noOfLines={1}>
+						{book.category}
+					</Text>
+				)}
+				<Heading as='h3' size='sm' fontSize='md' lineHeight='short' noOfLines={2}>
+					<LinkOverlay as={RouterLink} to={`/book/${book._id}`}>
+						{book.title}
+					</LinkOverlay>
+				</Heading>
+				<Text fontSize='sm' color='text.muted' noOfLines={1}>
+					{book.author}
+				</Text>
+				<Box mt={1}>
+					{book.numReviews ? (
+						<StarRating value={book.averageRating} count={book.numReviews} size='13px' />
+					) : (
+						<Text fontSize='sm' color='text.subtle'>
+							No reviews yet
+						</Text>
+					)}
+				</Box>
+				<Flex align='center' justify='space-between' mt='auto' pt={3}>
+					<Text fontWeight='bold' fontSize='lg'>
+						{formatPrice(book.price)}
+					</Text>
+					<Tooltip label={soldOut ? "Sold out" : "Add to cart"} openDelay={300}>
+						<IconButton aria-label={soldOut ? `${book.title} is sold out` : `Add ${book.title} to cart`} icon={<FiShoppingCart />} onClick={() => addToCart(book)} isDisabled={soldOut} rounded='full' position='relative' zIndex={1} />
+					</Tooltip>
+				</Flex>
+			</Flex>
 
-				<ModalContent>
-					<ModalHeader>Update Book</ModalHeader>
-					<ModalCloseButton />
-					<ModalBody>
-						<VStack spacing={4}>
-							<BookFormFields book={updatedBook} onChange={setUpdatedBook} />
-						</VStack>
-					</ModalBody>
-
-					<ModalFooter>
-						<Button
-							colorScheme='blue'
-							mr={3}
-							onClick={() => handleUpdateBook(book._id, updatedBook)}
-						>
-							Update
-						</Button>
-						<Button variant='ghost' onClick={onClose}>
-							Cancel
-						</Button>
-					</ModalFooter>
-				</ModalContent>
-			</Modal>
-		</Box>
+			{isAdmin && (
+				<>
+					<BookEditModal book={book} isOpen={edit.isOpen} onClose={edit.onClose} />
+					<ConfirmDialog
+						isOpen={confirmDelete.isOpen}
+						onClose={confirmDelete.onClose}
+						onConfirm={handleDelete}
+						title='Delete this book?'
+						body={`"${book.title}" and its reviews will be removed. Past orders keep their copy of the title and price.`}
+					/>
+				</>
+			)}
+		</LinkBox>
 	);
 };
 export default BookCard;

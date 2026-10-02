@@ -1,11 +1,13 @@
 import {
 	Badge,
 	Box,
+	Button,
 	Container,
 	Flex,
 	Heading,
+	HStack,
 	SimpleGrid,
-	Spinner,
+	Skeleton,
 	Stat,
 	StatLabel,
 	StatNumber,
@@ -16,32 +18,30 @@ import {
 	Th,
 	Thead,
 	Tr,
-	useColorModeValue,
 } from "@chakra-ui/react";
+import { FiAlertCircle, FiBookOpen, FiDollarSign, FiPlus, FiShoppingBag, FiTrendingUp, FiTruck, FiUsers } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { request } from "../api/request";
+import EmptyState from "../components/EmptyState";
+import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
 import StockBadge from "../components/StockBadge";
 import { ORDER_STATUSES } from "../store/orders";
 import { formatPrice } from "../utils/format";
 
-const Panel = ({ title, children }) => {
-	const bg = useColorModeValue("white", "gray.800");
-	return (
-		<Box bg={bg} p={5} rounded='lg' shadow='md'>
-			<Heading as='h2' size='md' mb={4}>
-				{title}
-			</Heading>
-			{children}
-		</Box>
-	);
-};
+const Panel = ({ title, children }) => (
+	<Box layerStyle='card' p={6} h='full'>
+		<Heading as='h2' size='md' mb={4}>
+			{title}
+		</Heading>
+		{children}
+	</Box>
+);
 
 const DashboardPage = () => {
 	const [report, setReport] = useState(null);
 	const [error, setError] = useState("");
-	const tileBg = useColorModeValue("white", "gray.800");
 
 	useEffect(() => {
 		request("/reports/sales")
@@ -51,42 +51,63 @@ const DashboardPage = () => {
 
 	if (error) {
 		return (
-			<Text py={12} textAlign='center' color='gray.500'>
-				{error}
-			</Text>
+			<Container maxW='container.md' py={16}>
+				<EmptyState icon={FiAlertCircle} title="Couldn't load the dashboard" description={error} />
+			</Container>
 		);
 	}
 	if (!report) {
 		return (
-			<Flex justify='center' py={20}>
-				<Spinner size='xl' />
-			</Flex>
+			<Container maxW='container.xl' py={{ base: 6, md: 10 }}>
+				<Skeleton h='10' w='48' mb={8} />
+				<SimpleGrid columns={{ base: 2, md: 3, lg: 5 }} spacing={4} mb={8}>
+					{Array.from({ length: 5 }, (_, i) => (
+						<Skeleton key={i} h='24' rounded='xl' />
+					))}
+				</SimpleGrid>
+				<Skeleton h='72' rounded='xl' />
+			</Container>
 		);
 	}
 
 	const { totals, ordersByStatus, salesByDay, topBooks, lowStock, lowStockThreshold } = report;
 	const tiles = [
-		{ label: "Revenue", value: formatPrice(totals.revenue) },
-		{ label: "Orders", value: totals.orders },
-		{ label: "Books sold", value: totals.itemsSold },
-		{ label: "Average order", value: formatPrice(totals.averageOrderValue) },
-		{ label: "Customers", value: totals.customers },
+		{ label: "Revenue", value: formatPrice(totals.revenue), icon: FiDollarSign },
+		{ label: "Orders", value: totals.orders, icon: FiShoppingBag },
+		{ label: "Books sold", value: totals.itemsSold, icon: FiBookOpen },
+		{ label: "Average order", value: formatPrice(totals.averageOrderValue), icon: FiTrendingUp },
+		{ label: "Customers", value: totals.customers, icon: FiUsers },
 	];
 
 	return (
-		<Container maxW='container.xl' py={12}>
-			<Heading as='h1' size='xl' mb={2}>
-				Dashboard
-			</Heading>
-			<Text color='gray.500' mb={8}>
-				Sales exclude cancelled orders.
-			</Text>
+		<Container maxW='container.xl' py={{ base: 6, md: 10 }}>
+			<PageHeader
+				title='Dashboard'
+				subtitle='Sales exclude cancelled orders.'
+				actions={
+					<HStack spacing={3}>
+						<Button as={RouterLink} to='/admin/orders' variant='outline' leftIcon={<FiTruck />}>
+							Manage orders
+						</Button>
+						<Button as={RouterLink} to='/create' leftIcon={<FiPlus />}>
+							Add a book
+						</Button>
+					</HStack>
+				}
+			/>
 
 			<SimpleGrid columns={{ base: 2, md: 3, lg: 5 }} spacing={4} mb={8}>
 				{tiles.map((tile) => (
-					<Stat key={tile.label} bg={tileBg} p={4} rounded='lg' shadow='md'>
-						<StatLabel>{tile.label}</StatLabel>
-						<StatNumber>{tile.value}</StatNumber>
+					<Stat key={tile.label} layerStyle='card' p={5}>
+						<Flex justify='space-between' align='flex-start'>
+							<Box>
+								<StatLabel color='text.muted'>{tile.label}</StatLabel>
+								<StatNumber fontSize='2xl'>{tile.value}</StatNumber>
+							</Box>
+							<Flex p={2} rounded='lg' bg='bg.brand' color='text.brand'>
+								<tile.icon />
+							</Flex>
+						</Flex>
 					</Stat>
 				))}
 			</SimpleGrid>
@@ -111,7 +132,7 @@ const DashboardPage = () => {
 							))}
 						</Tbody>
 					</Table>
-					<Text as={RouterLink} to='/admin/orders' color='blue.500' fontSize='sm' display='inline-block' mt={3}>
+					<Text as={RouterLink} to='/admin/orders' color='text.brand' fontSize='sm' fontWeight='medium' display='inline-block' mt={3}>
 						Manage orders →
 					</Text>
 				</Panel>
@@ -119,7 +140,7 @@ const DashboardPage = () => {
 				<Box gridColumn={{ lg: "span 2" }}>
 					<Panel title='Best sellers'>
 						{topBooks.length === 0 ? (
-							<Text color='gray.500'>No sales yet.</Text>
+							<Text color='text.muted'>No sales yet.</Text>
 						) : (
 							<Table size='sm'>
 								<Thead>
@@ -149,7 +170,7 @@ const DashboardPage = () => {
 
 				<Panel title={`Low stock (${lowStockThreshold} or fewer)`}>
 					{lowStock.length === 0 ? (
-						<Text color='gray.500'>Everything is well stocked.</Text>
+						<Text color='text.muted'>Everything is well stocked.</Text>
 					) : (
 						<Table size='sm'>
 							<Tbody>
