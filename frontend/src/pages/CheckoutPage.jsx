@@ -1,9 +1,10 @@
 import { Box, Button, Container, Flex, FormControl, FormLabel, Grid, Heading, HStack, Input, Radio, SimpleGrid, Skeleton, Text, useToast, VStack } from "@chakra-ui/react";
 import { useState } from "react";
-import { FiDollarSign, FiLock } from "react-icons/fi";
+import { FiAlertCircle, FiDollarSign, FiLock } from "react-icons/fi";
 import { Navigate, useNavigate } from "react-router-dom";
 import BookCover from "../components/BookCover";
 import CheckoutSteps from "../components/CheckoutSteps";
+import EmptyState from "../components/EmptyState";
 import OrderSummary from "../components/OrderSummary";
 import PageHeader from "../components/PageHeader";
 import { useCartLines } from "../hooks/useCartLines";
@@ -22,7 +23,7 @@ const ADDRESS_FIELDS = [
 
 const CheckoutPage = () => {
 	const user = useAuthStore((state) => state.user);
-	const { lines, total, isLoading } = useCartLines();
+	const { lines, total, isLoading, error, retry } = useCartLines();
 	const clearCart = useCartStore((state) => state.clear);
 	const placeOrder = useOrderStore((state) => state.placeOrder);
 	const [address, setAddress] = useState({ fullName: user?.name || "", phone: "", address: "", city: "", country: "" });
@@ -36,6 +37,13 @@ const CheckoutPage = () => {
 			<Container maxW='container.xl' py={{ base: 6, md: 10 }}>
 				<Skeleton h='10' w='48' mb={8} />
 				<Skeleton h='96' rounded='xl' />
+			</Container>
+		);
+	}
+	if (error) {
+		return (
+			<Container maxW='container.md' py={16}>
+				<EmptyState icon={FiAlertCircle} title="We couldn't load your cart" description='Your items are still saved. Please check your connection and try again.' action={<Button onClick={retry}>Retry</Button>} />
 			</Container>
 		);
 	}

@@ -17,6 +17,7 @@ const HeaderSearch = ({ onSearch, ...props }) => {
 
 	const go = (text) => {
 		const params = new URLSearchParams(isHome ? searchParams : undefined);
+		params.delete("page"); // a new search starts from page 1
 		if (text.trim()) params.set("q", text.trim());
 		else params.delete("q");
 		const query = params.toString();

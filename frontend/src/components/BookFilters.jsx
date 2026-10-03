@@ -1,5 +1,6 @@
 import { Button, Flex, HStack, Input, InputGroup, InputLeftAddon, Select, Text } from "@chakra-ui/react";
 import { FiX } from "react-icons/fi";
+import { resultSummary } from "../utils/pagination";
 
 const SORT_LABELS = {
 	newest: "Newest",
@@ -12,15 +13,15 @@ const SORT_LABELS = {
 
 // Result count, price range, sort and "clear" for the book list.
 // `filters` is a plain object; `onChange` receives the updated object.
-const BookFilters = ({ filters, onChange, resultCount, isLoading }) => {
+const BookFilters = ({ filters, onChange, resultCount, pagination, isLoading }) => {
 	const set = (field) => (e) => onChange({ ...filters, [field]: e.target.value });
-	const hasFilters = Object.entries(filters).some(([key, value]) => value && !(key === "sort" && value === "newest"));
+	const hasFilters = Object.entries(filters).some(([key, value]) => value && key !== "page" && !(key === "sort" && value === "newest"));
 
 	return (
 		<Flex w='full' align={{ base: "stretch", lg: "center" }} justify='space-between' gap={3} direction={{ base: "column", lg: "row" }}>
 			<HStack spacing={3}>
 				<Text color='text.muted' fontSize='sm' aria-live='polite'>
-					{isLoading ? "Loading books…" : `${resultCount} ${resultCount === 1 ? "book" : "books"}`}
+					{isLoading ? "Loading books…" : resultSummary(pagination, resultCount)}
 				</Text>
 				{hasFilters && (
 					<Button size='xs' variant='ghost' leftIcon={<FiX />} onClick={() => onChange({})}>

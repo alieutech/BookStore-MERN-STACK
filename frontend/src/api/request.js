@@ -17,9 +17,13 @@ export const request = async (path, options = {}) => {
       ...options.headers,
     },
   });
-  const data = await res.json().catch(() => ({}));
+  // null when the body can't be read (e.g. the page was left mid-request)
+  const data = await res.json().catch(() => null);
   // An expired or invalid token means the user has to log in again
   if (res.status === 401 && token) logout();
+  if (!data) {
+    throw new Error(res.ok ? "The server's response could not be read. Please try again." : `Request failed with status ${res.status}`);
+  }
   if (!res.ok || data.success === false) {
     throw new Error(data.message || `Request failed with status ${res.status}`);
   }

@@ -17,7 +17,7 @@ import {
 	StackDivider,
 	Text,
 } from "@chakra-ui/react";
-import { FiArrowLeft, FiShoppingCart, FiTrash2 } from "react-icons/fi";
+import { FiAlertCircle, FiArrowLeft, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { Link as RouterLink } from "react-router-dom";
 import BookCover from "../components/BookCover";
 import EmptyState from "../components/EmptyState";
@@ -28,7 +28,7 @@ import { MAX_QUANTITY, useCartStore } from "../store/cart";
 import { formatPrice } from "../utils/format";
 
 const CartPage = () => {
-	const { lines, total, isLoading } = useCartLines();
+	const { lines, total, isLoading, error, retry } = useCartLines();
 	const hasStockProblem = lines.some(({ quantity, book }) => quantity > (book.stock ?? 0));
 	const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 	const { setQuantity, removeItem } = useCartStore();
@@ -38,6 +38,14 @@ const CartPage = () => {
 			<Container maxW='container.xl' py={{ base: 6, md: 10 }}>
 				<Skeleton h='10' w='48' mb={8} />
 				<Skeleton h='64' rounded='xl' />
+			</Container>
+		);
+	}
+
+	if (error) {
+		return (
+			<Container maxW='container.md' py={16}>
+				<EmptyState icon={FiAlertCircle} title="We couldn't load your cart" description='Your items are still saved. Please check your connection and try again.' action={<Button onClick={retry}>Retry</Button>} />
 			</Container>
 		);
 	}
