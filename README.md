@@ -12,6 +12,7 @@ This project is open for collaboration — see [Contributing](#contributing).
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Running in production](#running-in-production)
+- [Deploy to Render](#deploy-to-render)
 - [Tests and CI](#tests-and-ci)
 - [Project structure](#project-structure)
 - [How it works](#how-it-works)
@@ -132,6 +133,35 @@ Before going live:
 - Serve the site over HTTPS (HSTS is switched on in production).
 
 > **Upgrading an existing database:** books created before inventory tracking start with a stock of 0 (the server sets this on startup and logs how many). Edit each book to set its stock, or orders for it will be refused.
+
+## Deploy to Render
+
+The repo includes a [Render Blueprint](render.yaml) that runs the whole app as **one web service**: it builds the React app, and the Express server serves it together with the API. Render has no MongoDB of its own, so the database runs on **MongoDB Atlas** (it has a free tier).
+
+### 1. Create the database (MongoDB Atlas)
+1. Sign up at [mongodb.com/atlas](https://www.mongodb.com/atlas) and create a free **M0** cluster.
+2. **Database Access** → add a database user with a password.
+3. **Network Access** → add `0.0.0.0/0` (allow from anywhere). Render's free instances don't have fixed IP addresses.
+4. **Connect** → **Drivers** → copy the connection string and add a database name after the host, e.g.
+   `mongodb+srv://bookstore:<password>@cluster0.abcde.mongodb.net/bookstore?retryWrites=true&w=majority`
+
+### 2. Create the service on Render
+1. Sign in at [render.com](https://render.com) with GitHub.
+2. **New** → **Blueprint** → pick this repository. Render reads `render.yaml`.
+3. Fill in the two values it asks for:
+   - `DATABASE_URI`: the Atlas connection string from step 1
+   - `ADMIN_EMAILS`: the email you'll sign up with to become the admin
+   (`JWT_SECRET` is generated for you, and `TRUST_PROXY` is preset.)
+4. Click **Apply**. The first build takes a few minutes. When it's live, open the `https://bookstore-xxxx.onrender.com` address Render shows.
+5. **Sign up with your admin email**, then add books from the Dashboard.
+
+Every push to `main` deploys automatically. Render only switches to the new version once `/health` reports the database as connected.
+
+### Good to know
+- **Free instances sleep** after about 15 minutes without visitors; the next visit takes up to a minute to wake it.
+- **Uploaded cover images aren't permanent on the free plan**: Render's disk is wiped on every deploy and restart. Either use image URLs for covers, or upgrade the service to a paid plan, add a [persistent disk](https://render.com/docs/disks) (e.g. mounted at `/var/data`) and set `UPLOAD_DIR=/var/data/uploads`.
+- **Custom domain:** add it under the service's **Settings → Custom Domains**; Render provides HTTPS automatically.
+- **Logs** are under the service's **Logs** tab if a deploy fails (the usual cause is a wrong `DATABASE_URI` or Atlas network access).
 
 ## Tests and CI
 

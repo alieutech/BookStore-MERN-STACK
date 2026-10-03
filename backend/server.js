@@ -1,4 +1,5 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const connectDB = require('./config/config');
 const Books = require('./models/Books');
 const { checkJwtSecret } = require('./middleware/security');
@@ -18,7 +19,20 @@ connectDB()
         const { modifiedCount } = await Books.updateMany({ stock: { $exists: false } }, { $set: { stock: 0 } });
         if (modifiedCount > 0) console.log(`Set stock to 0 for ${modifiedCount} existing book(s); update their stock in the admin UI.`);
 
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+        // Hosts like Render stop the old server with SIGTERM on every deploy:
+        // finish the requests in progress, close the database, then exit
+        const shutDown = (signal) => {
+            console.log(`${signal} received, shutting down`);
+            server.close(async () => {
+                await mongoose.disconnect();
+                process.exit(0);
+            });
+            setTimeout(() => process.exit(1), 10000).unref(); // don't wait forever
+        };
+        process.on('SIGTERM', () => shutDown('SIGTERM'));
+        process.on('SIGINT', () => shutDown('SIGINT'));
     })
     .catch((err) => {
         console.error('Failed to connect to MongoDB:', err.message);
