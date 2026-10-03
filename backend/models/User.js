@@ -22,6 +22,11 @@ const user = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    // Books saved for later, oldest first (see controllers/wishlist.js)
+    wishlist: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Books' }],
+        default: []
     }
 }, { timestamps: true })
 
@@ -29,6 +34,7 @@ const user = new mongoose.Schema({
 user.set('toJSON', {
     transform: (doc, ret) => {
         delete ret.password;
+        delete ret.wishlist; // served by /me/wishlist instead
         delete ret.__v;
         return ret;
     }

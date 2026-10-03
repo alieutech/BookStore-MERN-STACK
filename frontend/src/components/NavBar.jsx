@@ -25,15 +25,17 @@ import {
 	useDisclosure,
 	VStack,
 } from "@chakra-ui/react";
-import { FiBarChart2, FiChevronDown, FiLogOut, FiMenu, FiMoon, FiPackage, FiPlusSquare, FiShoppingBag, FiShoppingCart, FiSun, FiTruck } from "react-icons/fi";
+import { FiBarChart2, FiChevronDown, FiHeart, FiLogOut, FiMenu, FiMoon, FiPackage, FiPlusSquare, FiShoppingBag, FiShoppingCart, FiSun, FiTruck } from "react-icons/fi";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuthStore, useIsAdmin } from "../store/auth";
 import { useCartCount } from "../store/cart";
+import { useWishlistCount } from "../store/wishlist";
 import HeaderSearch from "./HeaderSearch";
 import Logo from "./Logo";
 
 // Links in the account menu (desktop) and the drawer (mobile)
 const accountLinks = (isAdmin) => [
+	{ to: "/wishlist", label: "Wishlist", icon: FiHeart },
 	{ to: "/my-orders", label: "My orders", icon: FiPackage },
 	...(isAdmin
 		? [
@@ -53,6 +55,22 @@ const CartButton = () => {
 				{cartCount > 0 && (
 					<Badge position='absolute' top='0' right='0' transform='translate(25%, -25%)' bg='brand.500' color='white' rounded='full' minW='5' h='5' fontSize='xs' display='flex' alignItems='center' justifyContent='center' pointerEvents='none'>
 						{cartCount}
+					</Badge>
+				)}
+			</Box>
+		</Tooltip>
+	);
+};
+
+const WishlistLink = () => {
+	const count = useWishlistCount();
+	return (
+		<Tooltip label='Wishlist' openDelay={400}>
+			<Box position='relative'>
+				<IconButton as={RouterLink} to='/wishlist' aria-label={`Wishlist, ${count} ${count === 1 ? "book" : "books"}`} icon={<FiHeart />} variant='ghost' colorScheme='gray' fontSize='xl' />
+				{count > 0 && (
+					<Badge position='absolute' top='0' right='0' transform='translate(25%, -25%)' bg='pink.500' color='white' rounded='full' minW='5' h='5' fontSize='xs' display='flex' alignItems='center' justifyContent='center' pointerEvents='none'>
+						{count}
 					</Badge>
 				)}
 			</Box>
@@ -90,6 +108,7 @@ const NavBar = () => {
 					</Box>
 
 					<HStack spacing={1} ml='auto' flexShrink={0}>
+						{user && <WishlistLink />}
 						<CartButton />
 						<Box display={{ base: "none", md: "block" }}>{colorModeButton}</Box>
 
@@ -114,6 +133,9 @@ const NavBar = () => {
 											</Text>
 										</Box>
 										<MenuDivider />
+										<MenuItem as={RouterLink} to='/wishlist' icon={<FiHeart />}>
+											Wishlist
+										</MenuItem>
 										<MenuItem as={RouterLink} to='/my-orders' icon={<FiPackage />}>
 											My orders
 										</MenuItem>

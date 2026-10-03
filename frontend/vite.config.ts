@@ -22,6 +22,11 @@ export default defineConfig({
         target: apiTarget,
         changeOrigin: true,
       },
+      // API only: the wishlist page in the app lives at /wishlist
+      '/me': {
+        target: apiTarget,
+        changeOrigin: true,
+      },
       '/reports': {
         target: apiTarget,
         changeOrigin: true,
