@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Books = require('../models/Books');
 const Review = require('../models/Review');
+const User = require('../models/User');
 const { removeUploadedImage } = require('../config/uploads');
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -129,6 +130,7 @@ const deleteBook = async (req, res, next) => {
             return res.status(404).json({ success: false, message: `No book matches ID ${id}.` });
         }
         await Review.deleteMany({ book: id });
+        await User.updateMany({ wishlist: id }, { $pull: { wishlist: id } });
         await removeUploadedImage(book.image);
         res.status(200).json({ success: true, message: `Book with ID ${id} deleted successfully.`, data: book });
     } catch (err) {

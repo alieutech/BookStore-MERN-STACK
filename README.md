@@ -24,6 +24,7 @@ This project is open for collaboration — see [Contributing](#contributing).
 - Browse the catalog, search by title or author, filter by category and price, and sort by newest, price, title or rating. Filters live in the URL, so they survive reloads and can be shared.
 - A page for every book with its description, stock status and reviews.
 - Sign up and log in; leave one 1–5 star review per book (marked **Verified purchase** if you ordered it).
+- Save books for later with the heart button. The **Wishlist** is kept with your account, so it follows you to any device.
 - A cart saved in the browser that always uses the latest prices and never exceeds the stock.
 - Checkout with a shipping address and **cash on delivery**; track orders under **My orders** and cancel them while they are still pending.
 - Light and dark mode, and layouts that work on phones.
@@ -85,7 +86,7 @@ npm install
 npm run dev             # http://localhost:5173
 ```
 
-The Vite dev server forwards API requests (`/auth`, `/books`, `/orders`, `/reports`, `/uploads`) to the backend, so the browser only talks to port 5173.
+The Vite dev server forwards API requests (`/auth`, `/books`, `/me`, `/orders`, `/reports`, `/uploads`) to the backend, so the browser only talks to port 5173.
 
 ### Create your admin account
 Put your email in `ADMIN_EMAILS` **before** signing up, then sign up in the app with that email. Accounts get their role when they are created, so an account made before its email was added stays a normal user.
@@ -220,6 +221,13 @@ All responses look like `{ "success": true, "message": "...", "data": ... }` (or
 | PUT | `/orders/:id/cancel` | Owner | Cancel a `pending` order |
 | GET | `/orders` | Admin | All orders, with the customer's name and email |
 | PUT | `/orders/:id/status` | Admin | Set `status` to `pending`, `processing`, `shipped`, `delivered` or `cancelled` |
+
+### Wishlist
+| Method | Route | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/me/wishlist` | Logged in | Your saved books, most recently saved first |
+| PUT | `/me/wishlist/:bookId` | Logged in | Save a book (saving it again does nothing). Returns the saved book IDs. Up to 200 books |
+| DELETE | `/me/wishlist/:bookId` | Logged in | Remove a book from your wishlist. Returns the saved book IDs |
 
 ### Admin tools
 | Method | Route | Access | Description |

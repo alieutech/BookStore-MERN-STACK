@@ -23,13 +23,14 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
-app.use(['/auth', '/books', '/orders', '/reports', '/uploads'], apiLimiter);
+app.use(['/auth', '/books', '/orders', '/reports', '/uploads', '/me'], apiLimiter);
 app.use(['/auth/login', '/auth/register'], authLimiter);
 app.use('/auth', require('./routers/auth'));
 app.use('/books', require('./routers/books'));
 app.use('/orders', require('./routers/orders'));
 app.use('/reports', require('./routers/reports'));
 app.use('/uploads', require('./routers/uploads'));
+app.use('/me', require('./routers/me'));
 // Uploaded cover images; nosniff stops browsers from treating them as anything but images
 app.use('/uploads', express.static(UPLOAD_DIR, {
     maxAge: '7d',

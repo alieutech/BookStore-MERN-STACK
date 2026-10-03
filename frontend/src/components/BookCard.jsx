@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, IconButton, LinkBox, LinkOverlay, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import { Box, Flex, Heading, HStack, IconButton, LinkBox, LinkOverlay, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
 import { FiEdit2, FiMoreVertical, FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { Link as RouterLink } from "react-router-dom";
 import { useAddToCart } from "../hooks/useAddToCart";
@@ -9,6 +9,7 @@ import BookCover from "./BookCover";
 import BookEditModal from "./BookEditModal";
 import ConfirmDialog from "./ConfirmDialog";
 import { StarRating } from "./StarRating";
+import WishlistButton from "./WishlistButton";
 import StockBadge, { LOW_STOCK } from "./StockBadge";
 
 const BookCard = ({ book }) => {
@@ -74,9 +75,12 @@ const BookCard = ({ book }) => {
 					<Text fontWeight='bold' fontSize='lg'>
 						{formatPrice(book.price)}
 					</Text>
-					<Tooltip label={soldOut ? "Sold out" : "Add to cart"} openDelay={300}>
-						<IconButton aria-label={soldOut ? `${book.title} is sold out` : `Add ${book.title} to cart`} icon={<FiShoppingCart />} onClick={() => addToCart(book)} isDisabled={soldOut} rounded='full' position='relative' zIndex={1} />
-					</Tooltip>
+					<HStack spacing={1}>
+						<WishlistButton book={book} />
+						<Tooltip label={soldOut ? "Sold out" : "Add to cart"} openDelay={300}>
+							<IconButton aria-label={soldOut ? `${book.title} is sold out` : `Add ${book.title} to cart`} icon={<FiShoppingCart />} onClick={() => addToCart(book)} isDisabled={soldOut} rounded='full' position='relative' zIndex={1} />
+						</Tooltip>
+					</HStack>
 				</Flex>
 			</Flex>
 

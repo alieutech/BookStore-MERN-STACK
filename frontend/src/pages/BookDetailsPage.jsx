@@ -32,6 +32,7 @@ import EmptyState from "../components/EmptyState";
 import PageHeader from "../components/PageHeader";
 import { StarInput, StarRating } from "../components/StarRating";
 import StockBadge from "../components/StockBadge";
+import WishlistButton from "../components/WishlistButton";
 import { useAddToCart } from "../hooks/useAddToCart";
 import { useAuthStore, useIsAdmin } from "../store/auth";
 import { useCartStore } from "../store/cart";
@@ -222,6 +223,7 @@ const BookDetailsPage = () => {
 											Edit
 										</Button>
 									)}
+									<WishlistButton book={book} withLabel size='lg' />
 									<Button leftIcon={<FiShoppingCart />} size='lg' onClick={() => addToCart(book)} isDisabled={soldOut}>
 										{soldOut ? "Sold out" : "Add to cart"}
 									</Button>
