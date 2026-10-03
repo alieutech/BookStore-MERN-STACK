@@ -8,6 +8,7 @@ import BookFilters from "../components/BookFilters";
 import BookGridSkeleton from "../components/BookGridSkeleton";
 import { BOOK_GRID_COLUMNS } from "../utils/layout";
 import CategoryChips from "../components/CategoryChips";
+import Pagination from "../components/Pagination";
 import EmptyState from "../components/EmptyState";
 import { useIsAdmin } from "../store/auth";
 import { useBookStore } from "../store/book";
@@ -51,18 +52,42 @@ const Hero = ({ featured }) => (
 );
 
 const HomePage = () => {
-	const { fetchBooks, books, isLoading } = useBookStore();
+	const { fetchBooks, books, pagination, isLoading } = useBookStore();
 	const isAdmin = useIsAdmin();
 
 	// Filters live in the URL (e.g. /?q=code&sort=price_asc) so they survive reloads and can be shared
 	const [searchParams, setSearchParams] = useSearchParams();
 	const filters = useMemo(() => Object.fromEntries(searchParams), [searchParams]);
-	const hasFilters = Object.keys(filters).length > 0;
+	const page = Math.max(1, Number.parseInt(filters.page, 10) || 1);
+	const hasFilters = Object.keys(filters).some((key) => key !== "page");
 
+	// Changing a filter starts again from page 1
 	const setFilters = useCallback(
-		(next) => setSearchParams(Object.fromEntries(Object.entries(next).filter(([, value]) => value)), { replace: true }),
+		(next) => {
+			const rest = { ...next };
+			delete rest.page;
+			setSearchParams(Object.fromEntries(Object.entries(rest).filter(([, value]) => value)), { replace: true });
+		},
 		[setSearchParams]
 	);
+
+	// Pages get their own history entries, so the back button returns to the previous page
+	const goToPage = (nextPage) => {
+		const params = new URLSearchParams(searchParams);
+		if (nextPage > 1) params.set("page", String(nextPage));
+		else params.delete("page");
+		setSearchParams(params);
+		document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+	};
+
+	// A page number past the end (e.g. after books were removed) jumps to the last page
+	useEffect(() => {
+		if (!isLoading && pagination && pagination.total > 0 && page > pagination.totalPages) {
+			const params = new URLSearchParams(searchParams);
+			params.set("page", String(pagination.totalPages));
+			setSearchParams(params, { replace: true });
+		}
+	}, [isLoading, pagination, page, searchParams, setSearchParams]);
 
 	useEffect(() => {
 		fetchBooks(filters);
@@ -73,23 +98,30 @@ const HomePage = () => {
 
 	return (
 		<Container maxW='container.xl' py={{ base: 6, md: 10 }}>
-			{!hasFilters && <Hero featured={featured.length ? featured : books.slice(0, 3)} />}
+			{!hasFilters && page === 1 && <Hero featured={featured.length ? featured : books.slice(0, 3)} />}
 
 			<Stack spacing={6} id='catalog' scrollMarginTop='24'>
 				<Heading as='h2' size='lg'>
 					{title}
 				</Heading>
 				<CategoryChips value={filters.category} onChange={(category) => setFilters({ ...filters, category })} />
-				<BookFilters filters={filters} onChange={setFilters} resultCount={books.length} isLoading={isLoading} />
+				<BookFilters filters={filters} onChange={setFilters} resultCount={books.length} pagination={pagination} isLoading={isLoading} />
 
 				{isLoading && books.length === 0 ? (
 					<BookGridSkeleton />
 				) : books.length > 0 ? (
-					<SimpleGrid columns={BOOK_GRID_COLUMNS} spacing={{ base: 4, md: 6 }} opacity={isLoading ? 0.6 : 1} transition='opacity 0.2s'>
-						{books.map((book) => (
-							<BookCard key={book._id} book={book} />
-						))}
-					</SimpleGrid>
+					<>
+						<SimpleGrid columns={BOOK_GRID_COLUMNS} spacing={{ base: 4, md: 6 }} opacity={isLoading ? 0.6 : 1} transition='opacity 0.2s'>
+							{books.map((book) => (
+								<BookCard key={book._id} book={book} />
+							))}
+						</SimpleGrid>
+						{pagination && (
+							<Box pt={4}>
+								<Pagination page={pagination.page} totalPages={pagination.totalPages} onChange={goToPage} />
+							</Box>
+						)}
+					</>
 				) : hasFilters ? (
 					<EmptyState
 						icon={FiSearch}

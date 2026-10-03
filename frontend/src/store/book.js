@@ -15,19 +15,21 @@ export const useBookStore = create((set) => ({
 
   categories: [],
   isLoading: false,
+  // { page, limit, total, totalPages } for the last list that was fetched
+  pagination: null,
 
-  // Fetch books. Optional filters: { q, category, minPrice, maxPrice, sort }
+  // Fetch one page of books. Optional filters: { q, category, minPrice, maxPrice, sort, page, limit }
   fetchBooks: async (filters = {}) => {
     const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
     const query = params.toString();
     set({ isLoading: true });
     try {
       const data = await request(query ? `/books?${query}` : "/books");
-      set({ books: data.data || [], isLoading: false });
+      set({ books: data.data || [], pagination: data.pagination || null, isLoading: false });
       return true;
     } catch (err) {
       console.error("Error fetching books:", err);
-      set({ books: [], isLoading: false });
+      set({ books: [], pagination: null, isLoading: false });
       return false;
     }
   },

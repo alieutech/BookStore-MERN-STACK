@@ -21,7 +21,7 @@ This project is open for collaboration — see [Contributing](#contributing).
 ## Features
 
 **For customers**
-- Browse the catalog, search by title or author, filter by category and price, and sort by newest, price, title or rating. Filters live in the URL, so they survive reloads and can be shared.
+- Browse the catalog 24 books per page, search by title or author, filter by category and price, and sort by newest, price, title or rating. Filters and the page number live in the URL, so they survive reloads, work with the back button and can be shared.
 - A page for every book with its description, stock status and reviews.
 - Sign up and log in; leave one 1–5 star review per book (marked **Verified purchase** if you ordered it).
 - A cart saved in the browser that always uses the latest prices and never exceeds the stock.
@@ -201,7 +201,7 @@ All responses look like `{ "success": true, "message": "...", "data": ... }` (or
 ### Books and reviews
 | Method | Route | Access | Description |
 | --- | --- | --- | --- |
-| GET | `/books` | Public | List books. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` = `newest` (default), `oldest`, `price_asc`, `price_desc`, `title`, `rating` |
+| GET | `/books` | Public | List books, one page at a time. Optional query: `q` (title or author), `category`, `minPrice`, `maxPrice`, `sort` = `newest` (default), `oldest`, `price_asc`, `price_desc`, `title`, `rating`; `page` (default 1) and `limit` (default 24, max 100); `ids` (comma-separated, up to 100) to fetch specific books. The response includes `pagination: { page, limit, total, totalPages }` |
 | GET | `/books/categories` | Public | Categories that have at least one book |
 | GET | `/books/:id` | Public | One book |
 | POST | `/books` | Admin | Create a book: `title`, `author`, `publishYear`, `price`, `image`, and optional `category`, `description`, `stock` |

@@ -39,7 +39,8 @@ export const useAuthStore = create(
       refreshUser: async () => {
         try {
           const { data } = await request("/auth/me");
-          set({ user: data });
+          // Only replace the saved user with a real one
+          if (data?._id) set({ user: data });
         } catch {
           // request() already logs out when the token is rejected
         }

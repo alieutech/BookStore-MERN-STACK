@@ -13,16 +13,40 @@ const SORT_OPTIONS = {
     title: { title: 1 },
     rating: { averageRating: -1, numReviews: -1 },
 };
+const DEFAULT_PAGE_SIZE = 24;
+const MAX_PAGE_SIZE = 100;
 const BOOK_FIELDS = ['title', 'author', 'publishYear', 'price', 'image', 'category', 'description', 'stock'];
 
 // Escape user text so it is matched literally inside a regular expression
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Fetch Books, optionally filtered and sorted:
+// Read a positive whole number from the query string, or return the fallback / null when invalid
+const readPositiveInt = (value, fallback) => {
+    if (value === undefined || value === '') return fallback;
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 1 ? number : null;
+};
+
+// Fetch Books one page at a time, optionally filtered and sorted:
 // ?q=text (title or author) &category=Name &minPrice=5 &maxPrice=20 &sort=newest|oldest|price_asc|price_desc|title|rating
+// &page=1 &limit=24 (max 100) &ids=id1,id2 (only these books, e.g. for the cart)
 const getBooks = async (req, res, next) => {
-    const { q, category, minPrice, maxPrice, sort = 'newest' } = req.query;
+    const { q, category, minPrice, maxPrice, ids, sort = 'newest' } = req.query;
     const filter = {};
+
+    const page = readPositiveInt(req.query.page, 1);
+    const limit = readPositiveInt(req.query.limit, DEFAULT_PAGE_SIZE);
+    if (page === null || limit === null || limit > MAX_PAGE_SIZE) {
+        return res.status(400).json({ success: false, message: `page must be 1 or more, and limit between 1 and ${MAX_PAGE_SIZE}.` });
+    }
+
+    if (typeof ids === 'string' && ids.trim()) {
+        const idList = [...new Set(ids.split(',').map((id) => id.trim()).filter(Boolean))];
+        if (idList.length > MAX_PAGE_SIZE || !idList.every(isValidId)) {
+            return res.status(400).json({ success: false, message: `ids must be up to ${MAX_PAGE_SIZE} valid book IDs, separated by commas.` });
+        }
+        filter._id = { $in: idList };
+    }
 
     if (typeof q === 'string' && q.trim()) {
         const pattern = new RegExp(escapeRegex(q.trim()), 'i');
@@ -44,8 +68,16 @@ const getBooks = async (req, res, next) => {
     }
 
     try {
-        const books = await Books.find(filter).sort(SORT_OPTIONS[sort]);
-        res.status(200).json({ success: true, data: books });
+        // _id breaks ties (same price, same rating...) so pages never repeat or skip a book
+        const [books, total] = await Promise.all([
+            Books.find(filter).sort({ ...SORT_OPTIONS[sort], _id: 1 }).skip((page - 1) * limit).limit(limit),
+            Books.countDocuments(filter),
+        ]);
+        res.status(200).json({
+            success: true,
+            data: books,
+            pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+        });
     } catch (err) {
         next(err);
     }
