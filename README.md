@@ -157,6 +157,17 @@ The repo includes a [Render Blueprint](render.yaml) that runs the whole app as *
 
 Every push to `main` deploys automatically. Render only switches to the new version once `/health` reports the database as connected.
 
+### Add sample books
+A new store starts empty. To add 10 sample books (with covers, prices, stock and categories) to your live database, run this **on your computer** from the `backend` folder, using the same Atlas connection string as Render's `DATABASE_URI`:
+
+```bash
+cd backend
+npm install
+DATABASE_URI="mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/bookstore?retryWrites=true&w=majority" npm run seed
+```
+
+On Windows PowerShell use `$env:DATABASE_URI="..."; npm run seed`. Books that are already there are skipped, so running it again is safe. The list lives in [`backend/data/sampleBooks.js`](backend/data/sampleBooks.js) if you want to change it.
+
 ### Good to know
 - **Free instances sleep** after about 15 minutes without visitors; the next visit takes up to a minute to wake it.
 - **Uploaded cover images aren't permanent on the free plan**: Render's disk is wiped on every deploy and restart. Either use image URLs for covers, or upgrade the service to a paid plan, add a [persistent disk](https://render.com/docs/disks) (e.g. mounted at `/var/data`) and set `UPLOAD_DIR=/var/data/uploads`.
